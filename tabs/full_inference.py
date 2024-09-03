@@ -13,7 +13,7 @@ now_dir = os.getcwd()
 sys.path.append(now_dir)
 
 model_root = os.path.join(now_dir, "logs")
-audio_root = os.path.join(now_dir, "assets", "audios")
+audio_root = os.path.join(now_dir, "audio_files", "original_files")
 
 model_root_relative = os.path.relpath(model_root, now_dir)
 audio_root_relative = os.path.relpath(audio_root, now_dir)

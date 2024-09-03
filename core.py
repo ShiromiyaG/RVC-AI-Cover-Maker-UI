@@ -620,3 +620,15 @@ def download_model(link):
     basename = os.path.basename(last_folder)
     os.rename(last_folder, os.path.join(now_dir, "logs", basename))
     return "Model downloaded with success"
+
+
+def download_music(link):
+    command = [
+        "yt-dlp",
+        "-x",
+        "--output",
+        os.path.join(now_dir, "audio_files", "original_files", "%(title)s.%(ext)s"),
+        link,
+    ]
+    subprocess.run(command)
+    return "Music downloaded with success"
