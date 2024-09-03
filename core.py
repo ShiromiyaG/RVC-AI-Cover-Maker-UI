@@ -443,10 +443,11 @@ def full_inference_program(
         os.makedirs(store_dir, exist_ok=True)
 
         dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
-        noreverb_file = search_with_word(dereverb_path, "noreverb")
-        no_reverb_file = search_with_word(dereverb_path, "No Reverb")
+        noreverb_file = search_with_word(dereverb_path, "noreverb") or search_with_word(
+            dereverb_path, "No Reverb"
+        )
 
-        input_file = os.path.join(dereverb_path, noreverb_file or no_reverb_file)
+        input_file = os.path.join(dereverb_path, noreverb_file)
 
         command = [
             "audio-separator",
@@ -549,17 +550,17 @@ def full_inference_program(
     deecho_path = os.path.join(now_dir, "audio_files", "deecho")
     dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
 
-    # Realizando as buscas
-    denoise = search_with_word(denoise_path, "No Noise") or search_with_word(
+    denoise_audio = search_with_word(denoise_path, "No Noise") or search_with_word(
         denoise_path, "other"
     )
-    deecho = search_with_word(deecho_path, "No Echo")
+    deecho_audio = search_with_word(deecho_path, "No Echo")
     dereverb = search_with_word(dereverb_path, "No Reverb") or search_with_word(
         dereverb_path, "noreverb"
     )
     final_path = os.path.join(
-        now_dir, "audio_files", "denoise", denoise or deecho or dereverb
+        now_dir, "audio_files", "denoise", denoise_audio or deecho_audio or dereverb
     )
+
     store_dir = os.path.join(now_dir, "audio_files", "rvc")
     os.makedirs(store_dir, exist_ok=True)
     command = [
@@ -619,12 +620,10 @@ def full_inference_program(
     store_dir = os.path.join(now_dir, "audio_files", "final")
     os.makedirs(store_dir, exist_ok=True)
 
-    vocals_path = os.path.join(now_dir, "audio_files", "vocals")
+    vocals_path = os.path.join(now_dir, "audio_files", "rvc")
     karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
 
-    vocals_file = search_with_word(vocals_path, "instrumental") or search_with_word(
-        vocals_path, "other"
-    )
+    vocals_file = get_last_modified_file(vocals_path)
     karaoke_file = (
         search_with_word(karaoke_path, "Instrumental")
         or search_with_word(karaoke_path, "other")
