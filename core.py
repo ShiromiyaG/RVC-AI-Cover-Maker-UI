@@ -159,6 +159,18 @@ def search_with_word(folder, word):
     return file_with_word[-1] if file_with_word else None
 
 
+def get_last_modified_folder(path):
+    directories = [
+        os.path.join(path, d)
+        for d in os.listdir(path)
+        if os.path.isdir(os.path.join(path, d))
+    ]
+    if not directories:
+        return None
+    last_modified_folder = max(directories, key=os.path.getmtime)
+    return last_modified_folder
+
+
 def add_audio_effects(
     audio_path,
     reverb_size,
@@ -295,6 +307,12 @@ def full_inference_program(
     model_info = get_model_info_by_name(karaoke_model)
     store_dir = os.path.join(now_dir, "audio_files", "karaoke")
     os.makedirs(store_dir, exist_ok=True)
+    vocals_path = os.path.join(now_dir, "audio_files", "vocals")
+    input_file = search_with_word(vocals_path, "vocals")
+
+    if input_file:
+        input_file = os.path.join(vocals_path, input_file)
+
     if model_info["name"] == "Mel-Roformer Karaoke by aufr33 and viperx":
         download_file(
             model_info["model_url"],
@@ -318,7 +336,7 @@ def full_inference_program(
             "--start_check_point",
             model_info["model"],
             "--input_file",
-            get_last_modified_file(os.path.join(now_dir, "audio_files", "vocals")),
+            input_file,
             "--store_dir",
             store_dir,
             "--flac_file",
@@ -335,7 +353,7 @@ def full_inference_program(
     else:
         command = [
             "audio-separator",
-            get_last_modified_file(os.path.join(now_dir, "audio_files", "vocals")),
+            input_file,
             "--log_level",
             "warning",
             "--normalization",
@@ -353,6 +371,14 @@ def full_inference_program(
     model_info = get_model_info_by_name(dereverb_model)
     store_dir = os.path.join(now_dir, "audio_files", "dereverb")
     os.makedirs(store_dir, exist_ok=True)
+    karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
+    input_file = search_with_word(karaoke_path, "karaoke") or search_with_word(
+        karaoke_path, "Instrumental"
+    )
+
+    if input_file:
+        input_file = os.path.join(karaoke_path, input_file)
+
     if (
         model_info["name"] == "BS-Roformer Dereverb by anvuew"
         or model_info["name"] == "MDX23C DeReverb by aufr33 and jarredou"
@@ -379,7 +405,7 @@ def full_inference_program(
             "--start_check_point",
             model_info["model"],
             "--input_file",
-            get_last_modified_file(os.path.join(now_dir, "audio_files", "karaoke")),
+            input_file,
             "--store_dir",
             store_dir,
             "--flac_file",
@@ -396,7 +422,7 @@ def full_inference_program(
     else:
         command = [
             "audio-separator",
-            get_last_modified_file(os.path.join(now_dir, "audio_files", "karaoke")),
+            input_file,
             "--log_level",
             "warning",
             "--normalization",
@@ -415,9 +441,16 @@ def full_inference_program(
         model_info = get_model_info_by_name(deecho_model)
         store_dir = os.path.join(now_dir, "audio_files", "deecho")
         os.makedirs(store_dir, exist_ok=True)
+
+        dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
+        noreverb_file = search_with_word(dereverb_path, "noreverb")
+        no_reverb_file = search_with_word(dereverb_path, "No Reverb")
+
+        input_file = os.path.join(dereverb_path, noreverb_file or no_reverb_file)
+
         command = [
             "audio-separator",
-            get_last_modified_file(os.path.join(now_dir, "audio_files", "dereverb")),
+            input_file,
             "--log_level",
             "warning",
             "--normalization",
@@ -436,17 +469,34 @@ def full_inference_program(
         model_info = get_model_info_by_name(denoise_model)
         store_dir = os.path.join(now_dir, "audio_files", "denoise")
         os.makedirs(store_dir, exist_ok=True)
+
+        input_file = (
+            os.path.join(
+                now_dir,
+                "audio_files",
+                "deecho",
+                search_with_word(
+                    os.path.join(now_dir, "audio_files", "deecho"), "No Echo"
+                ),
+            )
+            if deecho
+            else os.path.join(
+                now_dir,
+                "audio_files",
+                "dereverb",
+                search_with_word(
+                    os.path.join(now_dir, "audio_files", "dereverb"), "noreverb"
+                )
+                or search_with_word(
+                    os.path.join(now_dir, "audio_files", "dereverb"), "No Reverb"
+                ),
+            )
+        )
+
         if model_info["name"] == "mel-denoise":
-            download_file(
-                model_info["model_url"],
-                model_info["path"],
-                "model.ckpt",
-            )
-            download_file(
-                model_info["config_url"],
-                model_info["path"],
-                "config.yaml",
-            )
+            download_file(model_info["model_url"], model_info["path"], "model.ckpt")
+            download_file(model_info["config_url"], model_info["path"], "config.yaml")
+
             command = [
                 "python",
                 os.path.join(
@@ -462,15 +512,7 @@ def full_inference_program(
                 "--start_check_point",
                 model_info["model"],
                 "--input_file",
-                (
-                    get_last_modified_file(
-                        os.path.join(now_dir, "audio_files", "dereverb")
-                    )
-                    if deecho
-                    else get_last_modified_file(
-                        os.path.join(now_dir, "audio_files", "karaoke")
-                    )
-                ),
+                input_file,
                 "--store_dir",
                 store_dir,
                 "--flac_file",
@@ -487,9 +529,8 @@ def full_inference_program(
         else:
             command = [
                 "audio-separator",
-                get_last_modified_file(
-                    os.path.join(now_dir, "audio_files", "dereverb")
-                ),
+                "--input_file",
+                input_file,
                 "--log_level",
                 "warning",
                 "--normalization",
@@ -504,6 +545,21 @@ def full_inference_program(
             subprocess.run(command)
 
     # RVC
+    denoise_path = os.path.join(now_dir, "audio_files", "denoise")
+    deecho_path = os.path.join(now_dir, "audio_files", "deecho")
+    dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
+
+    # Realizando as buscas
+    denoise = search_with_word(denoise_path, "No Noise") or search_with_word(
+        denoise_path, "other"
+    )
+    deecho = search_with_word(deecho_path, "No Echo")
+    dereverb = search_with_word(dereverb_path, "No Reverb") or search_with_word(
+        dereverb_path, "noreverb"
+    )
+    final_path = os.path.join(
+        now_dir, "audio_files", "denoise", denoise or deecho or dereverb
+    )
     store_dir = os.path.join(now_dir, "audio_files", "rvc")
     os.makedirs(store_dir, exist_ok=True)
     command = [
@@ -527,15 +583,7 @@ def full_inference_program(
         "--pth_path",
         model_path,
         "--input_path",
-        get_last_modified_file(
-            os.path.join(now_dir, "audio_files", "denoise")
-            if denoise
-            else (
-                os.path.join(now_dir, "audio_files", "dereverb")
-                if deecho
-                else os.path.join(now_dir, "audio_files", "karaoke")
-            )
-        ),
+        final_path,
         "--output_path",
         store_dir,
         "--f0method",
@@ -570,46 +618,39 @@ def full_inference_program(
     # merge audios
     store_dir = os.path.join(now_dir, "audio_files", "final")
     os.makedirs(store_dir, exist_ok=True)
+
+    vocals_path = os.path.join(now_dir, "audio_files", "vocals")
+    karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
+
+    vocals_file = search_with_word(vocals_path, "instrumental") or search_with_word(
+        vocals_path, "other"
+    )
+    karaoke_file = (
+        search_with_word(karaoke_path, "Instrumental")
+        or search_with_word(karaoke_path, "other")
+        or search_with_word(karaoke_path, "karaoke")
+    )
+
+    final_output_path = os.path.join(
+        now_dir,
+        "audio_files",
+        "final",
+        f"{os.path.basename(input_audio_path)}_final",
+    )
+
     return (
         f"Audio file {os.path.basename(input_audio_path)} converted with success",
         merge_audios(
             get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc")),
-            search_with_word(
-                os.path.join(now_dir, "audio_files", "vocals"), "instrumental"
-            )
-            or search_with_word(
-                os.path.join(now_dir, "audio_files", "vocals"), "other"
-            ),
-            search_with_word(
-                os.path.join(now_dir, "audio_files", "karaoke"), "instrumental"
-            )
-            or search_with_word(
-                os.path.join(now_dir, "audio_files", "karaoke"), "other"
-            ),
-            os.path.join(
-                now_dir,
-                "audio_files",
-                "final",
-                f"{os.path.basename(input_audio_path)}_final",
-            ),
+            vocals_file,
+            karaoke_file,
+            final_output_path,
             vocals_volume,
             instrumentals_volume,
             backing_vocals_volume,
             export_format_final,
         ),
     )
-
-
-def get_last_modified_folder(path):
-    directories = [
-        os.path.join(path, d)
-        for d in os.listdir(path)
-        if os.path.isdir(os.path.join(path, d))
-    ]
-    if not directories:
-        return None
-    last_modified_folder = max(directories, key=os.path.getmtime)
-    return last_modified_folder
 
 
 def download_model(link):
