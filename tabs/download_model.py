@@ -11,7 +11,6 @@ def download_model_tab():
         link = gr.Textbox(
             label="Model URL",
             lines=1,
-            type="url",
         )
     output = gr.Textbox(
         label=i18n("Output Information"),
