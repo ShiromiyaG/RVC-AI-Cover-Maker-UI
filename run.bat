@@ -71,3 +71,9 @@ if not exist "programs/Applio"(
 env\python.exe main.py --open
 echo.
 pause
+exit /b 0
+
+:error
+echo An error occurred during installation. Please check the output above for details.
+pause
+exit /b 1
