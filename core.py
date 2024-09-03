@@ -14,7 +14,8 @@ sys.path.append(applio_dir)
 models_vocals = [
     {
         "name": "Mel-Roformer by KimberleyJSN",
-        "path": os.path.join(now_dir, "models", "mel-vocals", "model.ckpt"),
+        "path": os.path.join(now_dir, "models", "mel-vocals"),
+        "model": os.path.join(now_dir, "models", "mel-vocals", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "mel-vocals", "config.json"),
         "type": "mel_band_roformer",
         "config_url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/main/configs/KimberleyJensen/config_vocals_mel_band_roformer_kj.yaml",
@@ -22,7 +23,8 @@ models_vocals = [
     },
     {
         "name": "BS-Roformer by ViperX",
-        "path": os.path.join(now_dir, "models", "bs-vocals", "model.ckpt"),
+        "path": os.path.join(now_dir, "models", "bs-vocals"),
+        "model": os.path.join(now_dir, "models", "bs-vocals", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "bs-vocals", "config.json"),
         "type": "bs_roformer",
         "config_url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/main/configs/viperx/model_bs_roformer_ep_317_sdr_12.9755.yaml",
@@ -30,7 +32,8 @@ models_vocals = [
     },
     {
         "name": "MDX23C",
-        "path": os.path.join(now_dir, "models", "mdx23c-vocals", "model.ckpt"),
+        "path": os.path.join(now_dir, "models", "mdx23c-vocals"),
+        "model": os.path.join(now_dir, "models", "mdx23c-vocals", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "mdx23c-vocals", "config.json"),
         "type": "mdx23c",
         "config_url": "https://raw.githubusercontent.com/ZFTurbo/Music-Source-Separation-Training/main/configs/config_vocals_mdx23c.yaml",
@@ -41,7 +44,8 @@ models_vocals = [
 karaoke_models = [
     {
         "name": "Mel-Roformer Karaoke by aufr33 and viperx",
-        "path": os.path.join(now_dir, "models", "mel-kara", "model.ckpt"),
+        "path": os.path.join(now_dir, "models", "mel-kara"),
+        "model": os.path.join(now_dir, "models", "mel-kara", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "mel-kara", "config.json"),
         "type": "mel_band_roformer",
         "config_url": "https://huggingface.co/shiromiya/audio-separation-models/resolve/main/mel_band_roformer_karaoke_aufr33_viperx/config_mel_band_roformer_karaoke.yaml",
@@ -53,7 +57,8 @@ karaoke_models = [
 denoise_models = [
     {
         "name": "Mel-Roformer Denoise Normal by aufr33",
-        "path": os.path.join(now_dir, "models", "mel-denoise", "model.ckpt"),
+        "path": os.path.join(now_dir, "models", "mel-denoise"),
+        "model": os.path.join(now_dir, "models", "mel-denoise", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "mel-denoise", "config.json"),
         "type": "mel_band_roformer",
         "config_url": "https://huggingface.co/jarredou/aufr33_MelBand_Denoise/resolve/main/model_mel_band_roformer_denoise.yaml",
@@ -61,7 +66,8 @@ denoise_models = [
     },
     {
         "name": "Mel-Roformer Denoise Aggressive by aufr33",
-        "path": os.path.join(now_dir, "models", "mel-denoise-aggr", "model.ckpt"),
+        "path": os.path.join(now_dir, "models", "mel-denoise-aggr"),
+        "model": os.path.join(now_dir, "models", "mel-denoise-aggr", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "mel-denoise-aggr", "config.json"),
         "type": "mel_band_roformer",
         "config_url": "https://huggingface.co/jarredou/aufr33_MelBand_Denoise/resolve/main/model_mel_band_roformer_denoise.yaml",
@@ -76,7 +82,8 @@ denoise_models = [
 dereverb_models = [
     {
         "name": "MDX23C DeReverb by aufr33 and jarredou",
-        "path": os.path.join(now_dir, "models", "mdx23c-dereveb", "model.ckpt"),
+        "path": os.path.join(now_dir, "models", "mdx23c-dereveb"),
+        "model": os.path.join(now_dir, "models", "mdx23c-dereveb", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "mdx23c-dereveb", "config.json"),
         "type": "mdx23c",
         "config_url": "https://huggingface.co/jarredou/aufr33_jarredou_MDXv3_DeReverb/resolve/main/config_dereverb_mdx23c.yaml",
@@ -84,7 +91,8 @@ dereverb_models = [
     },
     {
         "name": "BS-Roformer Dereverb by anvuew",
-        "path": os.path.join(now_dir, "models", "mdx23c-dereveb", "model.ckpt"),
+        "path": os.path.join(now_dir, "models", "mdx23c-dereveb"),
+        "model": os.path.join(now_dir, "models", "mdx23c-dereveb", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "mdx23c-dereveb", "config.json"),
         "type": "bs_roformer",
         "config_url": "https://huggingface.co/anvuew/deverb_bs_roformer/resolve/main/deverb_bs_roformer_8_384dim_10depth.yaml",
@@ -128,7 +136,7 @@ def download_file(url, path, filename):
 
 
 def get_model_info_by_name(model_name):
-    for model in models_vocals:
+    for model in models_vocals or karaoke_models or dereverb_models or deecho_models:
         if model["name"] == model_name:
             return model
     return None
@@ -244,13 +252,13 @@ def full_inference_program(
     model_info = get_model_info_by_name(vocal_model)
     download_file(
         model_info["model_url"],
-        os.path.join(now_dir, "models", model_info["name"]),
+        model_info["path"],
         "model.ckpt",
     )
     download_file(
         model_info["config_url"],
-        os.path.join(now_dir, "models", model_info["name"]),
-        "config.ymal",
+        model_info["path"],
+        "config.yaml",
     )
     store_dir = os.path.join(now_dir, "audio_files", "vocals")
     os.makedirs(store_dir, exist_ok=True)
@@ -264,7 +272,7 @@ def full_inference_program(
         "--config_path",
         model_info["config"],
         "--start_check_point",
-        model_info["path"],
+        model_info["model"],
         "--input_file",
         input_audio_path,
         "--store_dir",
@@ -289,13 +297,13 @@ def full_inference_program(
     if model_info["name"] == "Mel-Roformer Karaoke by aufr33 and viperx":
         download_file(
             model_info["model_url"],
-            os.path.join(now_dir, "models", model_info["name"]),
+            model_info["path"],
             "model.ckpt",
         )
         download_file(
             model_info["config_url"],
-            os.path.join(now_dir, "models", model_info["name"]),
-            "config.ymal",
+            model_info["path"],
+            "config.yaml",
         )
         command = [
             "python",
@@ -307,7 +315,7 @@ def full_inference_program(
             "--config_path",
             model_info["config"],
             "--start_check_point",
-            model_info["path"],
+            model_info["model"],
             "--input_file",
             get_last_modified_file(os.path.join(now_dir, "audio_files", "vocals")),
             "--store_dir",
@@ -350,13 +358,13 @@ def full_inference_program(
     ):
         download_file(
             model_info["model_url"],
-            os.path.join(now_dir, "models", model_info["name"]),
+            model_info["path"],
             "model.ckpt",
         )
         download_file(
             model_info["config_url"],
-            os.path.join(now_dir, "models", model_info["name"]),
-            "config.ymal",
+            model_info["path"],
+            "config.yaml",
         )
         command = [
             "python",
@@ -368,7 +376,7 @@ def full_inference_program(
             "--config_path",
             model_info["config"],
             "--start_check_point",
-            model_info["path"],
+            model_info["model"],
             "--input_file",
             get_last_modified_file(os.path.join(now_dir, "audio_files", "karaoke")),
             "--store_dir",
@@ -430,13 +438,13 @@ def full_inference_program(
         if model_info["name"] == "mel-denoise":
             download_file(
                 model_info["model_url"],
-                os.path.join(now_dir, "models", model_info["name"]),
+                model_info["path"],
                 "model.ckpt",
             )
             download_file(
                 model_info["config_url"],
-                os.path.join(now_dir, "models", model_info["name"]),
-                "config.ymal",
+                model_info["path"],
+                "config.yaml",
             )
             command = [
                 "python",
@@ -451,7 +459,7 @@ def full_inference_program(
                 "--config_path",
                 model_info["config"],
                 "--start_check_point",
-                model_info["path"],
+                model_info["model"],
                 "--input_file",
                 (
                     get_last_modified_file(
