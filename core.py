@@ -342,6 +342,7 @@ def full_inference_program(
             "--flac_file",
             "--pcm_type",
             "PCM_16",
+            "--extract_instrumental",
         ]
 
         if force_cpu:
@@ -624,10 +625,8 @@ def full_inference_program(
     karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
 
     vocals_file = get_last_modified_file(vocals_path)
-    karaoke_file = (
-        search_with_word(karaoke_path, "Instrumental")
-        or search_with_word(karaoke_path, "other")
-        or search_with_word(karaoke_path, "karaoke")
+    karaoke_file = search_with_word(karaoke_path, "Instrumental") or search_with_word(
+        karaoke_path, "other"
     )
 
     final_output_path = os.path.join(
