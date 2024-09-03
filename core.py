@@ -300,7 +300,7 @@ def full_inference_program(
         command.append("--force_cpu")
     else:
         command.extend(["--device_ids", devices])
-
+    print("Separating vocals")
     subprocess.run(command)
 
     # karaoke separation
@@ -312,7 +312,7 @@ def full_inference_program(
 
     if input_file:
         input_file = os.path.join(vocals_path, input_file)
-
+    print("Separating Bakcing vocals")
     if model_info["name"] == "Mel-Roformer Karaoke by aufr33 and viperx":
         download_file(
             model_info["model_url"],
@@ -374,12 +374,12 @@ def full_inference_program(
     os.makedirs(store_dir, exist_ok=True)
     karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
     input_file = search_with_word(karaoke_path, "karaoke") or search_with_word(
-        karaoke_path, "Instrumental"
+        karaoke_path, "Vocals"
     )
 
     if input_file:
         input_file = os.path.join(karaoke_path, input_file)
-
+    print("Removing reverb")
     if (
         model_info["name"] == "BS-Roformer Dereverb by anvuew"
         or model_info["name"] == "MDX23C DeReverb by aufr33 and jarredou"
@@ -438,10 +438,11 @@ def full_inference_program(
         subprocess.run(command)
 
     # deecho
+    store_dir = os.path.join(now_dir, "audio_files", "deecho")
+    os.makedirs(store_dir, exist_ok=True)
     if deecho:
+        print("Removing echo")
         model_info = get_model_info_by_name(deecho_model)
-        store_dir = os.path.join(now_dir, "audio_files", "deecho")
-        os.makedirs(store_dir, exist_ok=True)
 
         dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
         noreverb_file = search_with_word(dereverb_path, "noreverb") or search_with_word(
@@ -467,11 +468,11 @@ def full_inference_program(
         subprocess.run(command)
 
     # denoise
+    store_dir = os.path.join(now_dir, "audio_files", "denoise")
+    os.makedirs(store_dir, exist_ok=True)
     if denoise:
         model_info = get_model_info_by_name(denoise_model)
-        store_dir = os.path.join(now_dir, "audio_files", "denoise")
-        os.makedirs(store_dir, exist_ok=True)
-
+        print("Removing noise")
         input_file = (
             os.path.join(
                 now_dir,
@@ -550,11 +551,11 @@ def full_inference_program(
     denoise_path = os.path.join(now_dir, "audio_files", "denoise")
     deecho_path = os.path.join(now_dir, "audio_files", "deecho")
     dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
-
     denoise_audio = search_with_word(denoise_path, "No Noise") or search_with_word(
         denoise_path, "other"
     )
     deecho_audio = search_with_word(deecho_path, "No Echo")
+
     dereverb = search_with_word(dereverb_path, "No Reverb") or search_with_word(
         dereverb_path, "noreverb"
     )
@@ -569,15 +570,15 @@ def full_inference_program(
         os.path.join(now_dir, "programs", "Applio", "core.py"),
         "infer",
         "--f0up_key",
-        pitch,
+        str(pitch),
         "--filter_radius",
-        filter_radius,
+        str(filter_radius),
         "--index_rate",
-        index_rate,
+        str(index_rate),
         "--rms_mix_rate",
-        rms_mix_rate,
+        str(rms_mix_rate),
         "--protect",
-        protect,
+        str(protect),
         "--split_audio",
         split_audio,
         "--index_path",
@@ -593,13 +594,14 @@ def full_inference_program(
         "--f0autotune",
         autotune,
         "--hop_length",
-        hop_lenght,
+        str(hop_lenght),
         "--export_format",
         export_format_rvc,
         "--embedder_model",
         embedder_model,
     ]
     os.chdir(os.path.join(now_dir, "programs", "Applio"))
+    print("Making RVC inference")
     subprocess.run(command)
     os.chdir(now_dir)
     # post process
@@ -626,7 +628,7 @@ def full_inference_program(
 
     vocals_file = get_last_modified_file(vocals_path)
     karaoke_file = search_with_word(karaoke_path, "Instrumental") or search_with_word(
-        karaoke_path, "other"
+        karaoke_path, "instrumental"
     )
 
     final_output_path = os.path.join(
@@ -635,7 +637,7 @@ def full_inference_program(
         "final",
         f"{os.path.basename(input_audio_path)}_final",
     )
-
+    print("Merging audios")
     return (
         f"Audio file {os.path.basename(input_audio_path)} converted with success",
         merge_audios(
