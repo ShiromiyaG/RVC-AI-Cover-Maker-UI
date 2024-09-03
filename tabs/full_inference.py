@@ -160,6 +160,40 @@ def delete_outputs():
                 os.remove(os.path.join(root, name))
 
 
+def change_choices():
+    names = [
+        os.path.join(root, file)
+        for root, _, files in os.walk(model_root_relative, topdown=False)
+        for file in files
+        if (
+            file.endswith((".pth", ".onnx"))
+            and not (file.startswith("G_") or file.startswith("D_"))
+        )
+    ]
+
+    indexes_list = [
+        os.path.join(root, name)
+        for root, _, files in os.walk(model_root_relative, topdown=False)
+        for name in files
+        if name.endswith(".index") and "trained" not in name
+    ]
+
+    audio_paths = [
+        os.path.join(root, name)
+        for root, _, files in os.walk(audio_root_relative, topdown=False)
+        for name in files
+        if name.endswith(tuple(sup_audioext))
+        and root == audio_root_relative
+        and "_output" not in name
+    ]
+
+    return (
+        {"choices": sorted(names), "__type__": "update"},
+        {"choices": sorted(indexes_list), "__type__": "update"},
+        {"choices": sorted(audio_paths), "__type__": "update"},
+    )
+
+
 def full_inference_tab():
     default_weight = names[0] if names else None
     with gr.Row():
@@ -187,21 +221,6 @@ def full_inference_tab():
 
             unload_button.click(
                 fn=lambda: (
-                    {"value": "", "__type__": "update"},
-                    {"value": "", "__type__": "update"},
-                ),
-                inputs=[],
-                outputs=[model_file, index_file],
-            )
-            refresh_button.click(
-                fn=lambda: (
-                    {
-                        "choices": sorted(
-                            names, key=lambda path: os.path.getsize(path)
-                        ),
-                        "__type__": "update",
-                    },
-                    {"choices": get_indexes(), "__type__": "update"},
                     {"value": "", "__type__": "update"},
                     {"value": "", "__type__": "update"},
                 ),
@@ -534,6 +553,11 @@ def full_inference_tab():
     def update_hop_length_visibility(pitch_extract_value):
         return gr.update(visible=pitch_extract_value in ["crepe", "crepe-tiny"])
 
+    refresh_button.click(
+        fn=change_choices,
+        inputs=[],
+        outputs=[model_file, index_file, audio],
+    )
     upload_audio.upload(
         fn=save_to_wav,
         inputs=[upload_audio],

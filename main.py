@@ -23,7 +23,7 @@ with gr.Blocks(theme=rvc_theme, title="RVC AI Cover Maker") as RVCAICoverMaker:
         full_inference_tab()
     with gr.Tab(i18n("Download Music")):
         download_music_tab()
-    with gr.Tab(i18n("download model")):
+    with gr.Tab(i18n("Download Model")):
         download_model_tab()
 
 
