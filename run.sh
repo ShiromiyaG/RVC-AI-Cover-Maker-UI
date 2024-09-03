@@ -56,7 +56,7 @@ if [ ! -d "env" ]; then
     source "$CONDA_ROOT_PREFIX/etc/profile.d/conda.sh"
     conda activate "$INSTALL_ENV_DIR" || exit 1
     pip install --upgrade setuptools || exit 1
-    pip install -r "$principal/requirements.txt" || exit 1
+    pip install --no-deps -r "$principal/requirements.txt" || exit 1
     pip uninstall torch torchvision torchaudio -y
     pip install torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu121 || exit 1
     conda deactivate
@@ -75,7 +75,9 @@ fi
 if [ ! -d "programs/Applio" ]; then
     echo "Cloning Applio..."
     git clone https://github.com/IAHispano/Applio.git programs/Applio
-    python programs/Applio/core.py prerequisites --pretraineds_v1 "False" --pretraineds_v2 "False" --models "True" --exe "True"
+    cd programs/Applio
+    python core.py prerequisites --pretraineds_v1 "False" --pretraineds_v2 "False" --models "True" --exe "True"
+    cd ../..
     echo
 fi
 

@@ -540,7 +540,9 @@ def full_inference_program(
         "--embedder_model",
         embedder_model,
     ]
+    os.chdir(os.path.join(now_dir, "programs", "Applio"))
     subprocess.run(command)
+    os.chdir(now_dir)
     # post process
     if reverb:
         add_audio_effects(
@@ -609,7 +611,9 @@ def download_model(link):
         "--model_link",
         link,
     ]
+    os.chdir(os.path.join(now_dir, "programs", "Applio"))
     subprocess.run(command)
+    os.chdir(now_dir)
     last_folder = get_last_modified_folder(
         os.path.join(now_dir, "programs", "Applio", "logs")
     )

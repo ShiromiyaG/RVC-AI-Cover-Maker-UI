@@ -48,7 +48,7 @@ if not exist env(
     echo Installing dependencies...
     call "%CONDA_ROOT_PREFIX%\condabin\conda.bat" activate "%INSTALL_ENV_DIR%" || goto :error
     pip install --upgrade setuptools || goto :error
-    pip install -r "%principal%\requirements.txt" || goto :error
+    pip install --no-deps -r "%principal%\requirements.txt" || goto :error
     pip uninstall torch torchvision torchaudio -y
     pip install torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu121 || goto :error
     call "%CONDA_ROOT_PREFIX%\condabin\conda.bat" deactivate
@@ -67,7 +67,9 @@ if not exist "programs/Music-Source-Separation-Training"(
 if not exist "programs/Applio"(
     echo Cloning Applio...
     git clone https://github.com/IAHispano/Applio.git programs/Applio
-    python programs/Applio/core.py prerequisites --pretraineds_v1 "False" --pretraineds_v2 "False" --models "True" --exe "True"
+    cd programs/Applio
+    python core.py prerequisites --pretraineds_v1 "False" --pretraineds_v2 "False" --models "True" --exe "True"
+    cd %principal%
     echo.
 )
 
