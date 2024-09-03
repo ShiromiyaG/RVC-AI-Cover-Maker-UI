@@ -7,7 +7,9 @@ from pedalboard.io import AudioFile
 from pydub import AudioSegment
 
 now_dir = os.getcwd()
+applio_dir = os.path.join(now_dir, "programs", "Applio")
 sys.path.append(now_dir)
+sys.path.append(applio_dir)
 
 models_vocals = [
     {

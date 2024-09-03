@@ -75,6 +75,7 @@ fi
 if [ ! -d "programs/Applio" ]; then
     echo "Cloning Applio..."
     git clone https://github.com/IAHispano/Applio.git programs/Applio
+    python programs/Applio/core.py prerequisites --pretraineds_v1 "False" --pretraineds_v2 "False" --models "True" --exe "True"
     echo
 fi
 
