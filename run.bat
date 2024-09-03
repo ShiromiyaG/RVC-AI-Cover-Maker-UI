@@ -59,6 +59,8 @@ if not exist env(
 if not exist "programs/Music-Source-Separation-Training"(
     echo Cloning Music-Source-Separation-Training...
     git clone https://github.com/ZFTurbo/Music-Source-Separation-Training.git programs/Music-Source-Separation-Training
+    del "programs/Music-Source-Separation-Training/inference.py"
+    curl -o "programs/Music-Source-Separation-Training/inference.py" "https://raw.githubusercontent.com/ShiromiyaG/RVC-AI-Cover-Maker/v2/Utils/inference.py"
     echo.
 )
 
