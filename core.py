@@ -136,12 +136,8 @@ def download_file(url, path, filename):
 
 
 def get_model_info_by_name(model_name):
-    for model in (
-        models_vocals
-        or model in karaoke_models
-        or model in dereverb_models
-        or model in deecho_models
-    ):
+    all_models = models_vocals + karaoke_models + dereverb_models + deecho_models
+    for model in all_models:
         if model["name"] == model_name:
             return model
     return None
