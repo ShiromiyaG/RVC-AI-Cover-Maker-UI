@@ -275,55 +275,9 @@ def full_inference_program(
     )
     store_dir = os.path.join(now_dir, "audio_files", "vocals")
     os.makedirs(store_dir, exist_ok=True)
-    command = [
-        "python",
-        os.path.join(
-            now_dir, "programs", "Music-Source-Separation-Training", "inference.py"
-        ),
-        "--model_type",
-        model_info["type"],
-        "--config_path",
-        model_info["config"],
-        "--start_check_point",
-        model_info["model"],
-        "--input_file",
-        input_audio_path,
-        "--store_dir",
-        store_dir,
-        "--flac_file",
-        "--pcm_type",
-        "PCM_16",
-        "--extract_instrumental",
-    ]
-
-    if force_cpu:
-        command.append("--force_cpu")
+    if os.path.exists(os.path.join(search_with_word(store_dir, "vocals"))):
+        print("Vocals already separated"),
     else:
-        command.extend(["--device_ids", devices])
-    print("Separating vocals")
-    subprocess.run(command)
-
-    # karaoke separation
-    model_info = get_model_info_by_name(karaoke_model)
-    store_dir = os.path.join(now_dir, "audio_files", "karaoke")
-    os.makedirs(store_dir, exist_ok=True)
-    vocals_path = os.path.join(now_dir, "audio_files", "vocals")
-    input_file = search_with_word(vocals_path, "vocals")
-
-    if input_file:
-        input_file = os.path.join(vocals_path, input_file)
-    print("Separating Bakcing vocals")
-    if model_info["name"] == "Mel-Roformer Karaoke by aufr33 and viperx":
-        download_file(
-            model_info["model_url"],
-            model_info["path"],
-            "model.ckpt",
-        )
-        download_file(
-            model_info["config_url"],
-            model_info["path"],
-            "config.yaml",
-        )
         command = [
             "python",
             os.path.join(
@@ -336,7 +290,7 @@ def full_inference_program(
             "--start_check_point",
             model_info["model"],
             "--input_file",
-            input_file,
+            input_audio_path,
             "--store_dir",
             store_dir,
             "--flac_file",
@@ -349,24 +303,80 @@ def full_inference_program(
             command.append("--force_cpu")
         else:
             command.extend(["--device_ids", devices])
+        print("Separating vocals")
+        subprocess.run(command)
 
-        subprocess.run(command)
+    # karaoke separation
+    model_info = get_model_info_by_name(karaoke_model)
+    store_dir = os.path.join(now_dir, "audio_files", "karaoke")
+    os.makedirs(store_dir, exist_ok=True)
+    vocals_path = os.path.join(now_dir, "audio_files", "vocals")
+    input_file = search_with_word(vocals_path, "vocals")
+    if os.path.exists(search_with_word(store_dir, "karaoke")) or os.path.exists(
+        search_with_word(store_dir, "Vocals")
+    ):
+        print("Backing vocals already separated")
     else:
-        command = [
-            "audio-separator",
-            input_file,
-            "--log_level",
-            "warning",
-            "--normalization",
-            "1.0",
-            "-m",
-            model_info["full_name"],
-            "--model_file_dir",
-            os.path.join(now_dir, "models", "karaoke"),
-            "--output_dir",
-            store_dir,
-        ]
-        subprocess.run(command)
+        if input_file:
+            input_file = os.path.join(vocals_path, input_file)
+        print("Separating Bakcing vocals")
+        if model_info["name"] == "Mel-Roformer Karaoke by aufr33 and viperx":
+            download_file(
+                model_info["model_url"],
+                model_info["path"],
+                "model.ckpt",
+            )
+            download_file(
+                model_info["config_url"],
+                model_info["path"],
+                "config.yaml",
+            )
+            command = [
+                "python",
+                os.path.join(
+                    now_dir,
+                    "programs",
+                    "Music-Source-Separation-Training",
+                    "inference.py",
+                ),
+                "--model_type",
+                model_info["type"],
+                "--config_path",
+                model_info["config"],
+                "--start_check_point",
+                model_info["model"],
+                "--input_file",
+                input_file,
+                "--store_dir",
+                store_dir,
+                "--flac_file",
+                "--pcm_type",
+                "PCM_16",
+                "--extract_instrumental",
+            ]
+
+            if force_cpu:
+                command.append("--force_cpu")
+            else:
+                command.extend(["--device_ids", devices])
+
+            subprocess.run(command)
+        else:
+            command = [
+                "audio-separator",
+                input_file,
+                "--log_level",
+                "warning",
+                "--normalization",
+                "1.0",
+                "-m",
+                model_info["full_name"],
+                "--model_file_dir",
+                os.path.join(now_dir, "models", "karaoke"),
+                "--output_dir",
+                store_dir,
+            ]
+            subprocess.run(command)
 
     # dereverb
     model_info = get_model_info_by_name(dereverb_model)
@@ -376,130 +386,28 @@ def full_inference_program(
     input_file = search_with_word(karaoke_path, "karaoke") or search_with_word(
         karaoke_path, "Vocals"
     )
-
-    if input_file:
-        input_file = os.path.join(karaoke_path, input_file)
-    print("Removing reverb")
-    if (
-        model_info["name"] == "BS-Roformer Dereverb by anvuew"
-        or model_info["name"] == "MDX23C DeReverb by aufr33 and jarredou"
+    if os.path.exists(search_with_word(store_dir, "noreverb")) or os.path.exists(
+        search_with_word(store_dir, "No Reverb")
     ):
-        download_file(
-            model_info["model_url"],
-            model_info["path"],
-            "model.ckpt",
-        )
-        download_file(
-            model_info["config_url"],
-            model_info["path"],
-            "config.yaml",
-        )
-        command = [
-            "python",
-            os.path.join(
-                now_dir, "programs", "Music-Source-Separation-Training", "inference.py"
-            ),
-            "--model_type",
-            model_info["type"],
-            "--config_path",
-            model_info["config"],
-            "--start_check_point",
-            model_info["model"],
-            "--input_file",
-            input_file,
-            "--store_dir",
-            store_dir,
-            "--flac_file",
-            "--pcm_type",
-            "PCM_16",
-        ]
-
-        if force_cpu:
-            command.append("--force_cpu")
-        else:
-            command.extend(["--device_ids", devices])
-
-        subprocess.run(command)
+        print("Reverb already removed")
     else:
-        command = [
-            "audio-separator",
-            input_file,
-            "--log_level",
-            "warning",
-            "--normalization",
-            "1.0",
-            "-m",
-            model_info["full_name"],
-            "--model_file_dir",
-            os.path.join(now_dir, "models", "dereverb"),
-            "--output_dir",
-            store_dir,
-        ]
-        subprocess.run(command)
-
-    # deecho
-    store_dir = os.path.join(now_dir, "audio_files", "deecho")
-    os.makedirs(store_dir, exist_ok=True)
-    if deecho:
-        print("Removing echo")
-        model_info = get_model_info_by_name(deecho_model)
-
-        dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
-        noreverb_file = search_with_word(dereverb_path, "noreverb") or search_with_word(
-            dereverb_path, "No Reverb"
-        )
-
-        input_file = os.path.join(dereverb_path, noreverb_file)
-
-        command = [
-            "audio-separator",
-            input_file,
-            "--log_level",
-            "warning",
-            "--normalization",
-            "1.0",
-            "-m",
-            model_info["full_name"],
-            "--model_file_dir",
-            os.path.join(now_dir, "models", "deecho"),
-            "--output_dir",
-            store_dir,
-        ]
-        subprocess.run(command)
-
-    # denoise
-    store_dir = os.path.join(now_dir, "audio_files", "denoise")
-    os.makedirs(store_dir, exist_ok=True)
-    if denoise:
-        model_info = get_model_info_by_name(denoise_model)
-        print("Removing noise")
-        input_file = (
-            os.path.join(
-                now_dir,
-                "audio_files",
-                "deecho",
-                search_with_word(
-                    os.path.join(now_dir, "audio_files", "deecho"), "No Echo"
-                ),
+        if input_file:
+            input_file = os.path.join(karaoke_path, input_file)
+        print("Removing reverb")
+        if (
+            model_info["name"] == "BS-Roformer Dereverb by anvuew"
+            or model_info["name"] == "MDX23C DeReverb by aufr33 and jarredou"
+        ):
+            download_file(
+                model_info["model_url"],
+                model_info["path"],
+                "model.ckpt",
             )
-            if deecho
-            else os.path.join(
-                now_dir,
-                "audio_files",
-                "dereverb",
-                search_with_word(
-                    os.path.join(now_dir, "audio_files", "dereverb"), "noreverb"
-                )
-                or search_with_word(
-                    os.path.join(now_dir, "audio_files", "dereverb"), "No Reverb"
-                ),
+            download_file(
+                model_info["config_url"],
+                model_info["path"],
+                "config.yaml",
             )
-        )
-
-        if model_info["name"] == "mel-denoise":
-            download_file(model_info["model_url"], model_info["path"], "model.ckpt")
-            download_file(model_info["config_url"], model_info["path"], "config.yaml")
-
             command = [
                 "python",
                 os.path.join(
@@ -532,7 +440,6 @@ def full_inference_program(
         else:
             command = [
                 "audio-separator",
-                "--input_file",
                 input_file,
                 "--log_level",
                 "warning",
@@ -541,18 +448,138 @@ def full_inference_program(
                 "-m",
                 model_info["full_name"],
                 "--model_file_dir",
-                os.path.join(now_dir, "models", "denoise"),
+                os.path.join(now_dir, "models", "dereverb"),
                 "--output_dir",
                 store_dir,
             ]
             subprocess.run(command)
+
+    # deecho
+    store_dir = os.path.join(now_dir, "audio_files", "deecho")
+    os.makedirs(store_dir, exist_ok=True)
+    if deecho:
+        if os.path.exists(search_with_word(store_dir, "No Echo")):
+            print("Echo already removed")
+        else:
+            print("Removing echo")
+            model_info = get_model_info_by_name(deecho_model)
+
+            dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
+            noreverb_file = search_with_word(
+                dereverb_path, "noreverb"
+            ) or search_with_word(dereverb_path, "No Reverb")
+
+            input_file = os.path.join(dereverb_path, noreverb_file)
+
+            command = [
+                "audio-separator",
+                input_file,
+                "--log_level",
+                "warning",
+                "--normalization",
+                "1.0",
+                "-m",
+                model_info["full_name"],
+                "--model_file_dir",
+                os.path.join(now_dir, "models", "deecho"),
+                "--output_dir",
+                store_dir,
+            ]
+            subprocess.run(command)
+
+    # denoise
+    store_dir = os.path.join(now_dir, "audio_files", "denoise")
+    os.makedirs(store_dir, exist_ok=True)
+    if denoise:
+        if os.path.exists(search_with_word(store_dir, "No Noise")) or os.path.exists(
+            search_with_word(store_dir, "dry")
+        ):
+            print("Noise already removed")
+        else:
+            model_info = get_model_info_by_name(denoise_model)
+            print("Removing noise")
+            input_file = (
+                os.path.join(
+                    now_dir,
+                    "audio_files",
+                    "deecho",
+                    search_with_word(
+                        os.path.join(now_dir, "audio_files", "deecho"), "No Echo"
+                    ),
+                )
+                if deecho
+                else os.path.join(
+                    now_dir,
+                    "audio_files",
+                    "dereverb",
+                    search_with_word(
+                        os.path.join(now_dir, "audio_files", "dereverb"), "noreverb"
+                    )
+                    or search_with_word(
+                        os.path.join(now_dir, "audio_files", "dereverb"), "No Reverb"
+                    ),
+                )
+            )
+
+            if model_info["name"] == "mel-denoise":
+                download_file(model_info["model_url"], model_info["path"], "model.ckpt")
+                download_file(
+                    model_info["config_url"], model_info["path"], "config.yaml"
+                )
+
+                command = [
+                    "python",
+                    os.path.join(
+                        now_dir,
+                        "programs",
+                        "Music-Source-Separation-Training",
+                        "inference.py",
+                    ),
+                    "--model_type",
+                    model_info["type"],
+                    "--config_path",
+                    model_info["config"],
+                    "--start_check_point",
+                    model_info["model"],
+                    "--input_file",
+                    input_file,
+                    "--store_dir",
+                    store_dir,
+                    "--flac_file",
+                    "--pcm_type",
+                    "PCM_16",
+                ]
+
+                if force_cpu:
+                    command.append("--force_cpu")
+                else:
+                    command.extend(["--device_ids", devices])
+
+                subprocess.run(command)
+            else:
+                command = [
+                    "audio-separator",
+                    "--input_file",
+                    input_file,
+                    "--log_level",
+                    "warning",
+                    "--normalization",
+                    "1.0",
+                    "-m",
+                    model_info["full_name"],
+                    "--model_file_dir",
+                    os.path.join(now_dir, "models", "denoise"),
+                    "--output_dir",
+                    store_dir,
+                ]
+                subprocess.run(command)
 
     # RVC
     denoise_path = os.path.join(now_dir, "audio_files", "denoise")
     deecho_path = os.path.join(now_dir, "audio_files", "deecho")
     dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
     denoise_audio = search_with_word(denoise_path, "No Noise") or search_with_word(
-        denoise_path, "other"
+        denoise_path, "dry"
     )
     deecho_audio = search_with_word(deecho_path, "No Echo")
 
