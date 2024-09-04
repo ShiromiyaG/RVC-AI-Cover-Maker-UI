@@ -11,7 +11,7 @@ import soundfile as sf
 from scipy.io import wavfile
 
 now_dir = os.getcwd()
-sys.path.append(now_dir)
+sys.path.append(now_dir, "programs", "applio_code", "rvc")
 
 from rvc.infer.pipeline import Pipeline as VC
 from rvc.lib.utils import load_audio_infer, load_embedding

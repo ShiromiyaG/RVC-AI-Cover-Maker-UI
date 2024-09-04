@@ -52,11 +52,11 @@ executables_list = [
 ]
 
 folder_mapping_list = {
-    "pretrained_v1/": "rvc/models/pretraineds/pretrained_v1/",
-    "pretrained_v2/": "rvc/models/pretraineds/pretrained_v2/",
-    "embedders/contentvec/": "rvc/models/embedders/contentvec/",
-    "predictors/": "rvc/models/predictors/",
-    "formant/": "rvc/models/formant/",
+    "pretrained_v1/": "programs/applio_code/rvc/models/pretraineds/pretrained_v1/",
+    "pretrained_v2/": "programs/applio_code/rvc/models/pretraineds/pretrained_v2/",
+    "embedders/contentvec/": "programs/applio_code/rvc/models/embedders/contentvec/",
+    "predictors/": "programs/applio_code/rvc/models/predictors/",
+    "formant/": "programs/applio_code/rvc/models/formant/",
 }
 
 

@@ -12,7 +12,7 @@ from scipy import signal
 from torch import Tensor
 
 now_dir = os.getcwd()
-sys.path.append(now_dir)
+sys.path.append(now_dir, "programs", "applio_code", "rvc")
 
 from rvc.lib.predictors.RMVPE import RMVPE0Predictor
 from rvc.lib.predictors.FCPE import FCPEF0Predictor
