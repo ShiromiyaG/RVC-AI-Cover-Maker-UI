@@ -1,7 +1,7 @@
 import math
 import torch
 
-from rvc.lib.algorithm.commons import convert_pad_shape
+from programs.applio_code.rvc.lib.algorithm.commons import convert_pad_shape
 
 
 class MultiHeadAttention(torch.nn.Module):

@@ -11,13 +11,13 @@ import soundfile as sf
 from scipy.io import wavfile
 
 now_dir = os.getcwd()
-sys.path.append(now_dir, "programs", "applio_code", "rvc")
+sys.path.append(now_dir)
 
-from rvc.infer.pipeline import Pipeline as VC
-from rvc.lib.utils import load_audio_infer, load_embedding
-from rvc.lib.tools.split_audio import process_audio, merge_audio
-from rvc.lib.algorithm.synthesizers import Synthesizer
-from rvc.configs.config import Config
+from programs.applio_code.rvc.infer.pipeline import Pipeline as VC
+from programs.applio_code.rvc.lib.utils import load_audio_infer, load_embedding
+from programs.applio_code.rvc.lib.tools.split_audio import process_audio, merge_audio
+from programs.applio_code.rvc.lib.algorithm.synthesizers import Synthesizer
+from programs.applio_code.rvc.configs.config import Config
 
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)

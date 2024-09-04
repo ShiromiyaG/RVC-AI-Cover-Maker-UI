@@ -159,5 +159,6 @@ def prequisites_download_pipeline(pretraineds_v1, pretraineds_v2, models, exe):
     else:
         pass
 
+
 if __name__ == "__main__":
     prequisites_download_pipeline(False, False, True, False)
