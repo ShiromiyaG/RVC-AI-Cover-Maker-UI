@@ -7,9 +7,8 @@ from pedalboard.io import AudioFile
 from pydub import AudioSegment
 
 now_dir = os.getcwd()
-applio_dir = os.path.join(now_dir, "programs", "Applio")
 sys.path.append(now_dir)
-sys.path.append(applio_dir)
+from programs.applio_code.rvc.infer.infer import VoiceConverter
 
 models_vocals = [
     {
@@ -600,45 +599,23 @@ def full_inference_program(
 
     store_dir = os.path.join(now_dir, "audio_files", "rvc")
     os.makedirs(store_dir, exist_ok=True)
-    command = [
-        "python",
-        os.path.join(now_dir, "programs", "Applio", "core.py"),
-        "infer",
-        "--pitch",
-        str(pitch),
-        "--filter_radius",
-        str(filter_radius),
-        "--index_rate",
-        str(index_rate),
-        "--volume_envelope",
-        str(rms_mix_rate),
-        "--protect",
-        str(protect),
-        "--split_audio",
-        str(split_audio),
-        "--index_path",
-        str(index_path),
-        "--pth_path",
-        str(model_path),
-        "--input_path",
-        final_path,
-        "--output_path",
-        store_dir,
-        "--f0_method",
-        str(pitch_extract),
-        "--f0_autotune",
-        str(autotune),
-        "--hop_length",
-        str(hop_lenght),
-        "--export_format",
-        export_format_rvc,
-        "--embedder_model",
-        embedder_model,
-    ]
-    os.chdir(os.path.join(now_dir, "programs", "Applio"))
     print("Making RVC inference")
-    subprocess.run(command)
-    os.chdir(now_dir)
+    VoiceConverter.convert_audio(
+        model_path,
+        index_path,
+        final_path,
+        store_dir,
+        export_format_rvc,
+        split_audio,
+        autotune,
+        pitch,
+        filter_radius,
+        index_rate,
+        rms_mix_rate,
+        protect,
+        pitch_extract,
+        hop_lenght,
+    )
     # post process
     if reverb:
         add_audio_effects(
