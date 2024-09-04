@@ -275,7 +275,7 @@ def full_inference_program(
     )
     store_dir = os.path.join(now_dir, "audio_files", "vocals")
     os.makedirs(store_dir, exist_ok=True)
-    if os.path.exists(os.path.join(search_with_word(store_dir, "vocals"))):
+    if search_with_word(store_dir, "vocals") != None:
         print("Vocals already separated"),
     else:
         command = [
@@ -312,8 +312,9 @@ def full_inference_program(
     os.makedirs(store_dir, exist_ok=True)
     vocals_path = os.path.join(now_dir, "audio_files", "vocals")
     input_file = search_with_word(vocals_path, "vocals")
-    if os.path.exists(search_with_word(store_dir, "karaoke")) or os.path.exists(
-        search_with_word(store_dir, "Vocals")
+    if (
+        search_with_word(store_dir, "karaoke") != None
+        or search_with_word(store_dir, "Vocals") != None
     ):
         print("Backing vocals already separated")
     else:
@@ -386,8 +387,9 @@ def full_inference_program(
     input_file = search_with_word(karaoke_path, "karaoke") or search_with_word(
         karaoke_path, "Vocals"
     )
-    if os.path.exists(search_with_word(store_dir, "noreverb")) or os.path.exists(
-        search_with_word(store_dir, "No Reverb")
+    if (
+        search_with_word(store_dir, "noreverb") != None
+        or search_with_word(store_dir, "No Reverb") != None
     ):
         print("Reverb already removed")
     else:
@@ -458,7 +460,7 @@ def full_inference_program(
     store_dir = os.path.join(now_dir, "audio_files", "deecho")
     os.makedirs(store_dir, exist_ok=True)
     if deecho:
-        if os.path.exists(search_with_word(store_dir, "No Echo")):
+        if search_with_word(store_dir, "No Echo") != None:
             print("Echo already removed")
         else:
             print("Removing echo")
@@ -491,8 +493,8 @@ def full_inference_program(
     store_dir = os.path.join(now_dir, "audio_files", "denoise")
     os.makedirs(store_dir, exist_ok=True)
     if denoise:
-        if os.path.exists(search_with_word(store_dir, "No Noise")) or os.path.exists(
-            search_with_word(store_dir, "dry")
+        if search_with_word(store_dir, "No Noise") != None or search_with_word(
+            store_dir, "dry" != None
         ):
             print("Noise already removed")
         else:
@@ -578,17 +580,23 @@ def full_inference_program(
     denoise_path = os.path.join(now_dir, "audio_files", "denoise")
     deecho_path = os.path.join(now_dir, "audio_files", "deecho")
     dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
+
     denoise_audio = search_with_word(denoise_path, "No Noise") or search_with_word(
         denoise_path, "dry"
     )
     deecho_audio = search_with_word(deecho_path, "No Echo")
-
     dereverb = search_with_word(dereverb_path, "No Reverb") or search_with_word(
         dereverb_path, "noreverb"
     )
-    final_path = os.path.join(
-        now_dir, "audio_files", "denoise", denoise_audio or deecho_audio or dereverb
-    )
+
+    if denoise_audio:
+        final_path = os.path.join(now_dir, "audio_files", "denoise", denoise_audio)
+    elif deecho_audio:
+        final_path = os.path.join(now_dir, "audio_files", "deecho", deecho_audio)
+    elif dereverb:
+        final_path = os.path.join(now_dir, "audio_files", "dereverb", dereverb)
+    else:
+        final_path = None
 
     store_dir = os.path.join(now_dir, "audio_files", "rvc")
     os.makedirs(store_dir, exist_ok=True)
@@ -596,30 +604,30 @@ def full_inference_program(
         "python",
         os.path.join(now_dir, "programs", "Applio", "core.py"),
         "infer",
-        "--f0up_key",
+        "--pitch",
         str(pitch),
         "--filter_radius",
         str(filter_radius),
         "--index_rate",
         str(index_rate),
-        "--rms_mix_rate",
+        "--volume_envelope",
         str(rms_mix_rate),
         "--protect",
         str(protect),
         "--split_audio",
-        split_audio,
+        str(split_audio),
         "--index_path",
-        index_path,
+        str(index_path),
         "--pth_path",
-        model_path,
+        str(model_path),
         "--input_path",
         final_path,
         "--output_path",
         store_dir,
-        "--f0method",
-        pitch_extract,
-        "--f0autotune",
-        autotune,
+        "--f0_method",
+        str(pitch_extract),
+        "--f0_autotune",
+        str(autotune),
         "--hop_length",
         str(hop_lenght),
         "--export_format",
