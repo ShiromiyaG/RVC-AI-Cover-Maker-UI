@@ -68,7 +68,9 @@ def format_title(title):
 
 
 def load_embedding(embedder_model, custom_embedder=None):
-    embedder_root = os.path.join(now_dir, "rvc", "models", "embedders")
+    embedder_root = os.path.join(
+        now_dir, "programs", "applio_code", "rvc", "models", "embedders"
+    )
     embedding_list = {
         "contentvec": os.path.join(embedder_root, "contentvec"),
         "chinese-hubert-base": os.path.join(embedder_root, "chinese_hubert_base"),

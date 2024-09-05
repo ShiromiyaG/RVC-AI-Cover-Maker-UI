@@ -128,6 +128,8 @@ def get_number_of_gpus():
     if torch.cuda.is_available():
         num_gpus = torch.cuda.device_count()
         return "-".join(map(str, range(num_gpus)))
+    else:
+        return "-"
 
 
 def format_title(title):
@@ -260,11 +262,7 @@ def full_inference_tab():
                     info=i18n(
                         "The path where the output audio will be saved, by default in audio_files/rvc/output.wav"
                     ),
-                    value=(
-                        output_path_fn(audio_paths[0])
-                        if audio_paths
-                        else os.path.join(now_dir, "audio_files", "rvc", "output.wav")
-                    ),
+                    value=(os.path.join(now_dir, "audio_files", "rvc", "output.wav")),
                     interactive=False,
                 )
                 export_format_rvc = gr.Radio(
@@ -487,28 +485,28 @@ def full_inference_tab():
                 vocals_volume = gr.Slider(
                     label=i18n("Vocals Volume"),
                     info=i18n("Adjust the volume of the vocals."),
-                    minimum=0,
-                    maximum=100,
+                    minimum=-10,
+                    maximum=0,
                     step=1,
-                    value=100,
+                    value=0,
                     interactive=True,
                 )
                 instrumentals_volume = gr.Slider(
                     label=i18n("Instrumentals Volume"),
                     info=i18n("Adjust the volume of the Instrumentals."),
-                    minimum=0,
-                    maximum=100,
+                    minimum=-10,
+                    maximum=0,
                     step=1,
-                    value=100,
+                    value=0,
                     interactive=True,
                 )
                 backing_vocals_volume = gr.Slider(
                     label=i18n("Backing Vocals Volume"),
                     info=i18n("Adjust the volume of the backing vocals."),
-                    minimum=0,
-                    maximum=100,
+                    minimum=-10,
+                    maximum=0,
                     step=1,
-                    value=100,
+                    value=0,
                     interactive=True,
                 )
                 export_format_final = gr.Radio(

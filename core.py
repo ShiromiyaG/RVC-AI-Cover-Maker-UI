@@ -326,7 +326,7 @@ def full_inference_program(
             os.path.join(store_dir, search_with_word(store_dir, "instrumental")),
             os.path.join(inst_dir, "instrumentals.flac"),
         )
-        inst_file = os.path.join(inst_dir, "instrumentals.flac")
+    inst_file = os.path.join(inst_dir, "instrumentals.flac")
 
     # karaoke separation
     model_info = get_model_info_by_name(karaoke_model)
@@ -626,7 +626,7 @@ def full_inference_program(
     inference_vc = import_voice_converter()
     inference_vc.convert_audio(
         audio_input_path=final_path,
-        audio_output_path=store_dir,
+        audio_output_path=output_path,
         model_path=model_path,
         index_path=index_path,
         embedder_model=embedder_model,
@@ -663,12 +663,9 @@ def full_inference_program(
     os.makedirs(store_dir, exist_ok=True)
 
     vocals_path = os.path.join(now_dir, "audio_files", "rvc")
-    vocals_file = (
-        os.path.join(
-            vocals_path,
-            get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc")),
-        ),
-    )
+    vocals_file = get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc"))
+    vocals_file = os.path.join(vocals_path, vocals_file)
+
     karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
     karaoke_file = search_with_word(karaoke_path, "Instrumental") or search_with_word(
         karaoke_path, "instrumental"
@@ -678,7 +675,7 @@ def full_inference_program(
         now_dir,
         "audio_files",
         "final",
-        f"{os.path.basename(input_audio_path)}_final",
+        f"{os.path.basename(input_audio_path).split('.')[0]}_final.{export_format_final.lower()}",
     )
     print("Merging audios")
     return (
