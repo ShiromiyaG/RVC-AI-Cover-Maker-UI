@@ -289,7 +289,9 @@ def full_inference_program(
         "config.yaml",
     )
     store_dir = os.path.join(now_dir, "audio_files", "vocals")
+    inst_dir = os.path.join(now_dir, "audio_files", "instrumentals")
     os.makedirs(store_dir, exist_ok=True)
+    os.makedirs(inst_dir, exist_ok=True)
     if search_with_word(store_dir, "vocals") != None:
         print("Vocals already separated"),
     else:
@@ -320,6 +322,11 @@ def full_inference_program(
             command.extend(["--device_ids", devices])
         print("Separating vocals")
         subprocess.run(command)
+        os.rename(
+            os.path.join(store_dir, search_with_word(store_dir, "instrumental")),
+            os.path.join(inst_dir, "instrumentals.flac"),
+        )
+        inst_file = os.path.join(inst_dir, "instrumentals.flac")
 
     # karaoke separation
     model_info = get_model_info_by_name(karaoke_model)
@@ -673,8 +680,14 @@ def full_inference_program(
     return (
         f"Audio file {os.path.basename(input_audio_path)} converted with success",
         merge_audios(
-            get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc")),
-            vocals_file,
+            os.path.join(
+                now_dir,
+                "audios_files",
+                "rvc",
+                "output.wav",
+                get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc")),
+            ),
+            inst_file,
             karaoke_file,
             final_output_path,
             vocals_volume,
