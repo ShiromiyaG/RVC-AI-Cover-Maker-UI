@@ -41,7 +41,9 @@ class Config:
     def load_config_json(self) -> dict:
         configs = {}
         for config_file in version_config_paths:
-            config_path = os.path.join("rvc", "configs", config_file)
+            config_path = os.path.join(
+                "programs", "applio_code", "rvc", "configs", config_file
+            )
             with open(config_path, "r") as f:
                 configs[config_file] = json.load(f)
         return configs
@@ -70,7 +72,9 @@ class Config:
         )
 
         for config_path in version_config_paths:
-            full_config_path = os.path.join("rvc", "configs", config_path)
+            full_config_path = os.path.join(
+                "programs", "applio_code", "rvc", "configs", config_path
+            )
             try:
                 with open(full_config_path, "r") as f:
                     config = json.load(f)
@@ -95,7 +99,9 @@ class Config:
         if not version_config_paths:
             raise FileNotFoundError("No configuration paths provided.")
 
-        full_config_path = os.path.join("rvc", "configs", version_config_paths[0])
+        full_config_path = os.path.join(
+            "programs", "applio_code", "rvc", "configs", version_config_paths[0]
+        )
         try:
             with open(full_config_path, "r") as f:
                 config = json.load(f)
