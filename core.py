@@ -1,15 +1,16 @@
 import sys, os
 import subprocess
 import torch
+from functools import lru_cache
 
 from pedalboard import Pedalboard, Reverb
 from pedalboard.io import AudioFile
 from pydub import AudioSegment
 
 now_dir = os.getcwd()
-applio_dir = os.path.join(now_dir, "programs", "Applio")
 sys.path.append(now_dir)
-sys.path.append(applio_dir)
+from programs.applio_code.rvc.infer.infer import VoiceConverter
+from programs.applio_code.rvc.lib.tools.model_download import model_download_pipeline
 
 models_vocals = [
     {
@@ -118,6 +119,20 @@ deecho_models = [
         "full_name": "UVR-De-Echo-Aggressive.pth",
     },
 ]
+
+
+@lru_cache(maxsize=None)
+def import_voice_converter():
+    from programs.applio_code.rvc.infer.infer import VoiceConverter
+
+    return VoiceConverter()
+
+
+@lru_cache(maxsize=1)
+def get_config():
+    from programs.applio_code.rvc.configs.config import Config
+
+    return Config()
 
 
 def download_file(url, path, filename):
@@ -274,7 +289,9 @@ def full_inference_program(
         "config.yaml",
     )
     store_dir = os.path.join(now_dir, "audio_files", "vocals")
+    inst_dir = os.path.join(now_dir, "audio_files", "instrumentals")
     os.makedirs(store_dir, exist_ok=True)
+    os.makedirs(inst_dir, exist_ok=True)
     if search_with_word(store_dir, "vocals") != None:
         print("Vocals already separated"),
     else:
@@ -305,6 +322,11 @@ def full_inference_program(
             command.extend(["--device_ids", devices])
         print("Separating vocals")
         subprocess.run(command)
+        os.rename(
+            os.path.join(store_dir, search_with_word(store_dir, "instrumental")),
+            os.path.join(inst_dir, "instrumentals.flac"),
+        )
+        inst_file = os.path.join(inst_dir, "instrumentals.flac")
 
     # karaoke separation
     model_info = get_model_info_by_name(karaoke_model)
@@ -600,45 +622,27 @@ def full_inference_program(
 
     store_dir = os.path.join(now_dir, "audio_files", "rvc")
     os.makedirs(store_dir, exist_ok=True)
-    command = [
-        "python",
-        os.path.join(now_dir, "programs", "Applio", "core.py"),
-        "infer",
-        "--pitch",
-        str(pitch),
-        "--filter_radius",
-        str(filter_radius),
-        "--index_rate",
-        str(index_rate),
-        "--volume_envelope",
-        str(rms_mix_rate),
-        "--protect",
-        str(protect),
-        "--split_audio",
-        str(split_audio),
-        "--index_path",
-        str(index_path),
-        "--pth_path",
-        str(model_path),
-        "--input_path",
-        final_path,
-        "--output_path",
-        store_dir,
-        "--f0_method",
-        str(pitch_extract),
-        "--f0_autotune",
-        str(autotune),
-        "--hop_length",
-        str(hop_lenght),
-        "--export_format",
-        export_format_rvc,
-        "--embedder_model",
-        embedder_model,
-    ]
-    os.chdir(os.path.join(now_dir, "programs", "Applio"))
     print("Making RVC inference")
-    subprocess.run(command)
-    os.chdir(now_dir)
+    inference_vc = import_voice_converter()
+    inference_vc.convert_audio(
+        audio_input_path=final_path,
+        audio_output_path=output_path,
+        model_path=model_path,
+        index_path=index_path,
+        embedder_model=embedder_model,
+        pitch=pitch,
+        f0_file=None,
+        f0_method=pitch_extract,
+        filter_radius=filter_radius,
+        index_rate=index_rate,
+        volume_envelope=rms_mix_rate,
+        protect=protect,
+        split_audio=split_audio,
+        f0_autotune=autotune,
+        hop_length=hop_lenght,
+        export_format=export_format_rvc,
+        embedder_model_custom=None,
+    )
     # post process
     if reverb:
         add_audio_effects(
@@ -676,8 +680,14 @@ def full_inference_program(
     return (
         f"Audio file {os.path.basename(input_audio_path)} converted with success",
         merge_audios(
-            get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc")),
-            vocals_file,
+            os.path.join(
+                now_dir,
+                "audios_files",
+                "rvc",
+                "output.wav",
+                get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc")),
+            ),
+            inst_file,
             karaoke_file,
             final_output_path,
             vocals_volume,
@@ -689,21 +699,7 @@ def full_inference_program(
 
 
 def download_model(link):
-    command = [
-        "python",
-        os.path.join(now_dir, "programs", "Applio", "core.py"),
-        "download",
-        "--model_link",
-        link,
-    ]
-    os.chdir(os.path.join(now_dir, "programs", "Applio"))
-    subprocess.run(command)
-    os.chdir(now_dir)
-    last_folder = get_last_modified_folder(
-        os.path.join(now_dir, "programs", "Applio", "logs")
-    )
-    basename = os.path.basename(last_folder)
-    os.rename(last_folder, os.path.join(now_dir, "logs", basename))
+    model_download_pipeline(link)
     return "Model downloaded with success"
 
 
