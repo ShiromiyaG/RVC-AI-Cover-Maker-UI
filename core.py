@@ -2,7 +2,7 @@ import sys, os
 import subprocess
 import torch
 from functools import lru_cache
-
+import shutil
 from pedalboard import Pedalboard, Reverb
 from pedalboard.io import AudioFile
 from pydub import AudioSegment
@@ -270,6 +270,7 @@ def full_inference_program(
     reverb_dry_gain,
     reverb_width,
     embedder_model,
+    delete_audios,
 ):
     if devices == "-":
         force_cpu = True
@@ -678,18 +679,27 @@ def full_inference_program(
         f"{os.path.basename(input_audio_path).split('.')[0]}_final.{export_format_final.lower()}",
     )
     print("Merging audios")
+    result = merge_audios(
+        vocals_file,
+        inst_file,
+        karaoke_file,
+        final_output_path,
+        vocals_volume,
+        instrumentals_volume,
+        backing_vocals_volume,
+        export_format_final,
+    )
+    print("Audios merged!")
+    if delete_audios:
+        main_directory = os.path.join(now_dir, "audio_files")
+        folder_to_keep = "final"
+        for folder_name in os.listdir(main_directory):
+            folder_path = os.path.join(main_directory, folder_name)
+            if os.path.isdir(folder_path) and folder_name != folder_to_keep:
+                shutil.rmtree(folder_path)
     return (
         f"Audio file {os.path.basename(input_audio_path)} converted with success",
-        merge_audios(
-            vocals_file,
-            inst_file,
-            karaoke_file,
-            final_output_path,
-            vocals_volume,
-            instrumentals_volume,
-            backing_vocals_volume,
-            export_format_final,
-        ),
+        result,
     )
 
 

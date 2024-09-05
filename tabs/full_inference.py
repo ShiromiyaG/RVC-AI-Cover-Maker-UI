@@ -426,6 +426,13 @@ def full_inference_tab():
                     visible=False,
                 )
             with gr.Accordion(i18n("Audio post-process Settings"), open=False):
+                delete_audios = gr.Checkbox(
+                    label=i18n("Delete Audios"),
+                    info=i18n("Delete the audios after the conversion."),
+                    visible=True,
+                    value=True,
+                    interactive=True,
+                )
                 reverb = gr.Checkbox(
                     label=i18n("Reverb"),
                     info=i18n("Apply reverb to the audio."),
@@ -602,6 +609,7 @@ def full_inference_tab():
             reverb_dry_gain,
             reverb_width,
             embedder_model,
+            delete_audios,
         ],
         outputs=[vc_output1, vc_output2],
     )
