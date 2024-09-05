@@ -72,12 +72,8 @@ if [ ! -d "programs/Music-Source-Separation-Training" ]; then
     echo
 fi
 
-if [ ! -d "programs/Applio" ]; then
-    echo "Cloning Applio..."
-    git clone https://github.com/IAHispano/Applio.git programs/Applio
-    cd programs/Applio
-    python core.py prerequisites --pretraineds_v1 "False" --pretraineds_v2 "False" --models "True" --exe "True"
-    cd ../..
+if [ ! -d "programs/applio_code/rvc/models" ]; then
+    python programs/applio_code/rvc/lib/tools/prerequisites_download.py
     echo
 fi
 

@@ -64,13 +64,8 @@ if not exist "programs/Music-Source-Separation-Training"(
     echo.
 )
 
-if not exist "programs/Applio"(
-    echo Cloning Applio...
-    git clone https://github.com/IAHispano/Applio.git programs/Applio
-    cd programs/Applio
-    python core.py prerequisites --pretraineds_v1 "False" --pretraineds_v2 "False" --models "True" --exe "True"
-    cd %principal%
-    echo.
+if not exist "programs/applio_code/rvc/models"(
+    python programs/applio_code/rvc/lib/tools/prerequisites_download.py
 )
 
 env\python.exe main.py --open
