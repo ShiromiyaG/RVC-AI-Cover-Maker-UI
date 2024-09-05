@@ -9,6 +9,7 @@ from pydub import AudioSegment
 now_dir = os.getcwd()
 sys.path.append(now_dir)
 from programs.applio_code.rvc.infer.infer import VoiceConverter
+from programs.applio_code.rvc.lib.tools.model_download import model_download_pipeline
 
 models_vocals = [
     {
@@ -666,21 +667,7 @@ def full_inference_program(
 
 
 def download_model(link):
-    command = [
-        "python",
-        os.path.join(now_dir, "programs", "Applio", "core.py"),
-        "download",
-        "--model_link",
-        link,
-    ]
-    os.chdir(os.path.join(now_dir, "programs", "Applio"))
-    subprocess.run(command)
-    os.chdir(now_dir)
-    last_folder = get_last_modified_folder(
-        os.path.join(now_dir, "programs", "Applio", "logs")
-    )
-    basename = os.path.basename(last_folder)
-    os.rename(last_folder, os.path.join(now_dir, "logs", basename))
+    model_download_pipeline(link)
     return "Model downloaded with success"
 
 
