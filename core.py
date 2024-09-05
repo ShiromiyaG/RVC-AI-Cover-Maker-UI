@@ -1,6 +1,7 @@
 import sys, os
 import subprocess
 import torch
+from functools import lru_cache
 
 from pedalboard import Pedalboard, Reverb
 from pedalboard.io import AudioFile
@@ -118,6 +119,20 @@ deecho_models = [
         "full_name": "UVR-De-Echo-Aggressive.pth",
     },
 ]
+
+
+@lru_cache(maxsize=None)
+def import_voice_converter():
+    from programs.applio_code.rvc.infer.infer import VoiceConverter
+
+    return VoiceConverter()
+
+
+@lru_cache(maxsize=1)
+def get_config():
+    from programs.applio_code.rvc.configs.config import Config
+
+    return Config()
 
 
 def download_file(url, path, filename):
@@ -601,21 +616,25 @@ def full_inference_program(
     store_dir = os.path.join(now_dir, "audio_files", "rvc")
     os.makedirs(store_dir, exist_ok=True)
     print("Making RVC inference")
-    VoiceConverter.convert_audio(
-        model_path,
-        index_path,
-        final_path,
-        store_dir,
-        export_format_rvc,
-        split_audio,
-        autotune,
-        pitch,
-        filter_radius,
-        index_rate,
-        rms_mix_rate,
-        protect,
-        pitch_extract,
-        hop_lenght,
+    inference_vc = import_voice_converter()
+    inference_vc.convert_audio(
+        audio_input_path=final_path,
+        audio_output_path=output_path,
+        model_path=model_path,
+        index_path=index_path,
+        embedder_model=embedder_model,
+        pitch=pitch,
+        f0_file=None,
+        f0_method=pitch_extract,
+        filter_radius=filter_radius,
+        index_rate=index_rate,
+        volume_envelope=rms_mix_rate,
+        protect=protect,
+        split_audio=split_audio,
+        f0_autotune=autotune,
+        hop_length=hop_lenght,
+        export_format=export_format_rvc,
+        embedder_model_custom=None,
     )
     # post process
     if reverb:
