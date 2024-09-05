@@ -663,13 +663,17 @@ def full_inference_program(
     os.makedirs(store_dir, exist_ok=True)
 
     vocals_path = os.path.join(now_dir, "audio_files", "rvc")
+    vocals_file = (
+        os.path.join(
+            vocals_path,
+            get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc")),
+        ),
+    )
     karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
-
-    vocals_file = get_last_modified_file(vocals_path)
     karaoke_file = search_with_word(karaoke_path, "Instrumental") or search_with_word(
         karaoke_path, "instrumental"
     )
-
+    karaoke_file = os.path.join(karaoke_path, karaoke_file)
     final_output_path = os.path.join(
         now_dir,
         "audio_files",
@@ -680,13 +684,7 @@ def full_inference_program(
     return (
         f"Audio file {os.path.basename(input_audio_path)} converted with success",
         merge_audios(
-            os.path.join(
-                now_dir,
-                "audios_files",
-                "rvc",
-                "output.wav",
-                get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc")),
-            ),
+            vocals_file,
             inst_file,
             karaoke_file,
             final_output_path,
