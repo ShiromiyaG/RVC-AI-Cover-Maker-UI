@@ -626,7 +626,7 @@ def full_inference_program(
     inference_vc = import_voice_converter()
     inference_vc.convert_audio(
         audio_input_path=final_path,
-        audio_output_path=output_path,
+        audio_output_path=store_dir,
         model_path=model_path,
         index_path=index_path,
         embedder_model=embedder_model,

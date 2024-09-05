@@ -263,7 +263,7 @@ def full_inference_tab():
                     value=(
                         output_path_fn(audio_paths[0])
                         if audio_paths
-                        else os.path.join(now_dir, "audios_files", "rvc", "output.wav")
+                        else os.path.join(now_dir, "audio_files", "rvc", "output.wav")
                     ),
                     interactive=False,
                 )
