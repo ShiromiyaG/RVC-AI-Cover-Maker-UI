@@ -488,7 +488,7 @@ def full_inference_tab():
                     minimum=-10,
                     maximum=0,
                     step=1,
-                    value=0,
+                    value=-3,
                     interactive=True,
                 )
                 instrumentals_volume = gr.Slider(
@@ -497,7 +497,7 @@ def full_inference_tab():
                     minimum=-10,
                     maximum=0,
                     step=1,
-                    value=0,
+                    value=-3,
                     interactive=True,
                 )
                 backing_vocals_volume = gr.Slider(
@@ -506,7 +506,7 @@ def full_inference_tab():
                     minimum=-10,
                     maximum=0,
                     step=1,
-                    value=0,
+                    value=-3,
                     interactive=True,
                 )
                 export_format_final = gr.Radio(
