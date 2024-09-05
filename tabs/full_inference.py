@@ -258,14 +258,14 @@ def full_inference_tab():
                     label=i18n("Output Path"),
                     placeholder=i18n("Enter output path"),
                     info=i18n(
-                        "The path where the output audio will be saved, by default in assets/audios/output.wav"
+                        "The path where the output audio will be saved, by default in audio_files/rvc/output.wav"
                     ),
                     value=(
                         output_path_fn(audio_paths[0])
                         if audio_paths
-                        else os.path.join(now_dir, "assets", "audios", "output.wav")
+                        else os.path.join(now_dir, "audios_files", "rvc", "output.wav")
                     ),
-                    interactive=True,
+                    interactive=False,
                 )
                 export_format_rvc = gr.Radio(
                     label=i18n("Export Format"),
