@@ -9,7 +9,7 @@ i18n = I18nAuto()
 def download_music_tab():
     with gr.Row():
         link = gr.Textbox(
-            label="Music URL",
+            label=i18n("Music URL"),
             lines=1,
         )
     output = gr.Textbox(

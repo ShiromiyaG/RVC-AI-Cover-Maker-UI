@@ -9,7 +9,7 @@ i18n = I18nAuto()
 def download_model_tab():
     with gr.Row():
         link = gr.Textbox(
-            label="Model URL",
+            label=i18n("Model URL"),
             lines=1,
         )
     output = gr.Textbox(
