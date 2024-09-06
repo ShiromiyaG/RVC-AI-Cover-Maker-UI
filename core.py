@@ -8,10 +8,12 @@ from pedalboard.io import AudioFile
 from pydub import AudioSegment
 from audio_separator.separator import Separator
 
+
 now_dir = os.getcwd()
 sys.path.append(now_dir)
 from programs.applio_code.rvc.infer.infer import VoiceConverter
 from programs.applio_code.rvc.lib.tools.model_download import model_download_pipeline
+from programs.music_separation_code.inference import proc_file
 
 models_vocals = [
     {
@@ -272,12 +274,17 @@ def full_inference_program(
     reverb_width,
     embedder_model,
     delete_audios,
+    use_tta,
 ):
+    # Configuração de devices
     if devices == "-":
-        force_cpu = True
+        device = "cpu"
     else:
-        force_cpu = False
-        devices = devices.replace("-", " ")
+        devices = devices.split("-")
+        if type(devices) == list:
+            device = f'cuda:{devices[0]}'
+        else:
+            device = f'cuda:{devices}'
     # Vocals Separation
     model_info = get_model_info_by_name(vocal_model)
     model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
@@ -301,33 +308,21 @@ def full_inference_program(
     if search_with_word(store_dir, "vocals") != None:
         print("Vocals already separated"),
     else:
-        command = [
-            "python",
-            os.path.join(
-                now_dir, "programs", "Music-Source-Separation-Training", "inference.py"
-            ),
-            "--model_type",
-            model_info["type"],
-            "--config_path",
-            model_info["config"],
-            "--start_check_point",
-            model_info["model"],
-            "--input_file",
-            input_audio_path,
-            "--store_dir",
-            store_dir,
-            "--flac_file",
-            "--pcm_type",
-            "PCM_16",
-            "--extract_instrumental",
-        ]
-
-        if force_cpu:
-            command.append("--force_cpu")
-        else:
-            command.extend(["--device_ids", devices])
         print("Separating vocals")
-        subprocess.run(command)
+        proc_file(
+            model_type=model_info["type"],
+            config_path=model_info["config"],
+            start_check_point=model_info["model"],
+            input_file=input_audio_path,
+            store_dir=store_dir,
+            device_ids=devices,
+            device=device,
+            extract_instrumental=True,
+            disable_detailed_pbar=False,
+            flac_file=True,
+            pcm_type="PCM_16",
+            use_tta=use_tta,
+        )
         os.rename(
             os.path.join(store_dir, search_with_word(store_dir, "instrumental")),
             os.path.join(inst_dir, "instrumentals.flac"),
@@ -364,36 +359,20 @@ def full_inference_program(
                     model_info["path"],
                     "config.yaml",
                 )
-            command = [
-                "python",
-                os.path.join(
-                    now_dir,
-                    "programs",
-                    "Music-Source-Separation-Training",
-                    "inference.py",
-                ),
-                "--model_type",
-                model_info["type"],
-                "--config_path",
-                model_info["config"],
-                "--start_check_point",
-                model_info["model"],
-                "--input_file",
-                input_file,
-                "--store_dir",
-                store_dir,
-                "--flac_file",
-                "--pcm_type",
-                "PCM_16",
-                "--extract_instrumental",
-            ]
-
-            if force_cpu:
-                command.append("--force_cpu")
-            else:
-                command.extend(["--device_ids", devices])
-
-            subprocess.run(command)
+            proc_file(
+                model_type=model_info["type"],
+                config_path=model_info["config"],
+                start_check_point=model_info["model"],
+                input_file=input_file,
+                store_dir=store_dir,
+                device_ids=devices,
+                device=device,
+                extract_instrumental=True,
+                disable_detailed_pbar=False,
+                flac_file=True,
+                pcm_type="PCM_16",
+                use_tta=use_tta,
+            )
         else:
             separator = Separator(
                 model_file_dir=os.path.join(now_dir, "models", "karaoke"),
@@ -440,35 +419,20 @@ def full_inference_program(
                     model_info["path"],
                     "config.yaml",
                 )
-            command = [
-                "python",
-                os.path.join(
-                    now_dir,
-                    "programs",
-                    "Music-Source-Separation-Training",
-                    "inference.py",
-                ),
-                "--model_type",
-                model_info["type"],
-                "--config_path",
-                model_info["config"],
-                "--start_check_point",
-                model_info["model"],
-                "--input_file",
-                input_file,
-                "--store_dir",
-                store_dir,
-                "--flac_file",
-                "--pcm_type",
-                "PCM_16",
-            ]
-
-            if force_cpu:
-                command.append("--force_cpu")
-            else:
-                command.extend(["--device_ids", devices])
-
-            subprocess.run(command)
+            proc_file(
+                model_type=model_info["type"],
+                config_path=model_info["config"],
+                start_check_point=model_info["model"],
+                input_file=input_file,
+                store_dir=store_dir,
+                device_ids=devices,
+                device=device,
+                extract_instrumental=False,
+                disable_detailed_pbar=False,
+                flac_file=True,
+                pcm_type="PCM_16",
+                use_tta=use_tta,
+            )
         else:
             separator = Separator(
                 model_file_dir=os.path.join(now_dir, "models", "dereverb"),
@@ -556,36 +520,20 @@ def full_inference_program(
                         model_info["path"],
                         "config.yaml"
                     )
-
-                command = [
-                    "python",
-                    os.path.join(
-                        now_dir,
-                        "programs",
-                        "Music-Source-Separation-Training",
-                        "inference.py",
-                    ),
-                    "--model_type",
-                    model_info["type"],
-                    "--config_path",
-                    model_info["config"],
-                    "--start_check_point",
-                    model_info["model"],
-                    "--input_file",
-                    input_file,
-                    "--store_dir",
-                    store_dir,
-                    "--flac_file",
-                    "--pcm_type",
-                    "PCM_16",
-                ]
-
-                if force_cpu:
-                    command.append("--force_cpu")
-                else:
-                    command.extend(["--device_ids", devices])
-
-                subprocess.run(command)
+                proc_file(
+                    model_type=model_info["type"],
+                    config_path=model_info["config"],
+                    start_check_point=model_info["model"],
+                    input_file=input_file,
+                    store_dir=store_dir,
+                    device_ids=devices,
+                    device=device,
+                    extract_instrumental=False,
+                    disable_detailed_pbar=False,
+                    flac_file=True,
+                    pcm_type="PCM_16",
+                    use_tta=use_tta,
+                )
             else:
                 separator = Separator(
                     model_file_dir=os.path.join(now_dir, "models", "denoise"),

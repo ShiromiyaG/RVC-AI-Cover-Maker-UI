@@ -18,6 +18,8 @@ audio_root = os.path.join(now_dir, "audio_files", "original_files")
 model_root_relative = os.path.relpath(model_root, now_dir)
 audio_root_relative = os.path.relpath(audio_root, now_dir)
 
+output_path = os.path.join(now_dir, "audio_files", "rvc", "output.wav")
+
 sup_audioext = {
     "wav",
     "mp3",
@@ -256,15 +258,6 @@ def full_inference_tab():
                 clear_outputs_infer = gr.Button(
                     i18n("Clear Outputs (Deletes all audios in assets/audios)")
                 )
-                output_path = gr.Textbox(
-                    label=i18n("Output Path"),
-                    placeholder=i18n("Enter output path"),
-                    info=i18n(
-                        "The path where the output audio will be saved, by default in audio_files/rvc/output.wav"
-                    ),
-                    value=(os.path.join(now_dir, "audio_files", "rvc", "output.wav")),
-                    interactive=False,
-                )
                 export_format_rvc = gr.Radio(
                     label=i18n("Export Format"),
                     info=i18n("Select the format to export the audio."),
@@ -370,6 +363,13 @@ def full_inference_tab():
                     interactive=True,
                 )
             with gr.Accordion(i18n("Audio Separation Settings"), open=False):
+                use_tta = gr.Checkbox(
+                    label=i18n("Use TTA"),
+                    info=i18n("Use Test Time Augmentation."),
+                    visible=True,
+                    value=False,
+                    interactive=True,
+                )
                 vocal_model = gr.Dropdown(
                     label=i18n("Vocals Model"),
                     info=i18n("Select the vocals model to use for the separation."),
@@ -610,6 +610,7 @@ def full_inference_tab():
             reverb_width,
             embedder_model,
             delete_audios,
+            use_tta,
         ],
         outputs=[vc_output1, vc_output2],
     )
