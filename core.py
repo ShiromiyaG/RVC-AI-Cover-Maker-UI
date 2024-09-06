@@ -616,7 +616,6 @@ def full_inference_program(
             reverb_dry_gain,
             reverb_damping,
             reverb_width,
-            output_path,
             os.path.join(
                 now_dir, "audio_files", "rvc", os.path.basename(input_audio_path)
             ),
