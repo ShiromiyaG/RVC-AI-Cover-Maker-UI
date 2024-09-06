@@ -6,6 +6,7 @@ import shutil
 from pedalboard import Pedalboard, Reverb
 from pedalboard.io import AudioFile
 from pydub import AudioSegment
+from audio_separator.separator import Separator
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -279,16 +280,20 @@ def full_inference_program(
         devices = devices.replace("-", " ")
     # Vocals Separation
     model_info = get_model_info_by_name(vocal_model)
-    download_file(
-        model_info["model_url"],
-        model_info["path"],
-        "model.ckpt",
-    )
-    download_file(
-        model_info["config_url"],
-        model_info["path"],
-        "config.yaml",
-    )
+    model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
+    if not os.path.exists(model_ckpt_path):
+        download_file(
+            model_info["model_url"],
+            model_info["path"],
+            "model.ckpt",
+        )
+    config_json_path = os.path.join(model_info["path"], "config.yaml")
+    if not os.path.exists(config_json_path):
+        download_file(
+            model_info["config_url"],
+            model_info["path"],
+            "config.yaml",
+        )
     store_dir = os.path.join(now_dir, "audio_files", "vocals")
     inst_dir = os.path.join(now_dir, "audio_files", "instrumentals")
     os.makedirs(store_dir, exist_ok=True)
@@ -345,16 +350,20 @@ def full_inference_program(
             input_file = os.path.join(vocals_path, input_file)
         print("Separating Bakcing vocals")
         if model_info["name"] == "Mel-Roformer Karaoke by aufr33 and viperx":
-            download_file(
-                model_info["model_url"],
-                model_info["path"],
-                "model.ckpt",
-            )
-            download_file(
-                model_info["config_url"],
-                model_info["path"],
-                "config.yaml",
-            )
+            model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
+            if not os.path.exists(model_ckpt_path):
+                download_file(
+                    model_info["model_url"],
+                    model_info["path"],
+                    "model.ckpt",
+                )
+            config_json_path = os.path.join(model_info["path"], "config.yaml")
+            if not os.path.exists(config_json_path):
+                download_file(
+                    model_info["config_url"],
+                    model_info["path"],
+                    "config.yaml",
+                )
             command = [
                 "python",
                 os.path.join(
@@ -386,21 +395,15 @@ def full_inference_program(
 
             subprocess.run(command)
         else:
-            command = [
-                "audio-separator",
-                input_file,
-                "--log_level",
-                "warning",
-                "--normalization",
-                "1.0",
-                "-m",
-                model_info["full_name"],
-                "--model_file_dir",
-                os.path.join(now_dir, "models", "karaoke"),
-                "--output_dir",
-                store_dir,
-            ]
-            subprocess.run(command)
+            separator = Separator(
+                model_file_dir=os.path.join(now_dir, "models", "karaoke"),
+                log_level="warning",
+                normalization_threshold="1.0",
+                output_format="flac",
+                output_dir=store_dir
+            )
+            separator.load_model(model_filename=model_info["full_name"])
+            separator.separate(input_file)
 
     # dereverb
     model_info = get_model_info_by_name(dereverb_model)
@@ -423,16 +426,20 @@ def full_inference_program(
             model_info["name"] == "BS-Roformer Dereverb by anvuew"
             or model_info["name"] == "MDX23C DeReverb by aufr33 and jarredou"
         ):
-            download_file(
-                model_info["model_url"],
-                model_info["path"],
-                "model.ckpt",
-            )
-            download_file(
-                model_info["config_url"],
-                model_info["path"],
-                "config.yaml",
-            )
+            model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
+            if not os.path.exists(model_ckpt_path):
+                download_file(
+                    model_info["model_url"],
+                    model_info["path"],
+                    "model.ckpt",
+                )
+            config_json_path = os.path.join(model_info["path"], "config.yaml")
+            if not os.path.exists(config_json_path):
+                download_file(
+                    model_info["config_url"],
+                    model_info["path"],
+                    "config.yaml",
+                )
             command = [
                 "python",
                 os.path.join(
@@ -463,21 +470,15 @@ def full_inference_program(
 
             subprocess.run(command)
         else:
-            command = [
-                "audio-separator",
-                input_file,
-                "--log_level",
-                "warning",
-                "--normalization",
-                "1.0",
-                "-m",
-                model_info["full_name"],
-                "--model_file_dir",
-                os.path.join(now_dir, "models", "dereverb"),
-                "--output_dir",
-                store_dir,
-            ]
-            subprocess.run(command)
+            separator = Separator(
+                model_file_dir=os.path.join(now_dir, "models", "dereverb"),
+                log_level="warning",
+                normalization_threshold="1.0",
+                output_format="flac",
+                output_dir=store_dir
+            )
+            separator.load_model(model_filename=model_info["full_name"])
+            separator.separate(input_file)
 
     # deecho
     store_dir = os.path.join(now_dir, "audio_files", "deecho")
@@ -496,21 +497,15 @@ def full_inference_program(
 
             input_file = os.path.join(dereverb_path, noreverb_file)
 
-            command = [
-                "audio-separator",
-                input_file,
-                "--log_level",
-                "warning",
-                "--normalization",
-                "1.0",
-                "-m",
-                model_info["full_name"],
-                "--model_file_dir",
-                os.path.join(now_dir, "models", "deecho"),
-                "--output_dir",
-                store_dir,
-            ]
-            subprocess.run(command)
+            separator = Separator(
+                model_file_dir=os.path.join(now_dir, "models", "deecho"),
+                log_level="warning",
+                normalization_threshold="1.0",
+                output_format="flac",
+                output_dir=store_dir
+            )
+            separator.load_model(model_filename=model_info["full_name"])
+            separator.separate(input_file)
 
     # denoise
     store_dir = os.path.join(now_dir, "audio_files", "denoise")
@@ -546,11 +541,21 @@ def full_inference_program(
                 )
             )
 
-            if model_info["name"] == "mel-denoise":
-                download_file(model_info["model_url"], model_info["path"], "model.ckpt")
-                download_file(
-                    model_info["config_url"], model_info["path"], "config.yaml"
-                )
+            if model_info["name"] == "Mel-Roformer Denoise Normal by aufr33" or model_info["mame"] == "Mel-Roformer Denoise Aggressive by aufr33":
+                model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
+                if not os.path.exists(model_ckpt_path):
+                    download_file(
+                        model_info["model_url"],
+                        model_info["path"],
+                        "model.ckpt",
+                    )
+                config_json_path = os.path.join(model_info["path"], "config.yaml")
+                if not os.path.exists(config_json_path):
+                    download_file(
+                        model_info["config_url"],
+                        model_info["path"],
+                        "config.yaml"
+                    )
 
                 command = [
                     "python",
@@ -582,22 +587,15 @@ def full_inference_program(
 
                 subprocess.run(command)
             else:
-                command = [
-                    "audio-separator",
-                    "--input_file",
-                    input_file,
-                    "--log_level",
-                    "warning",
-                    "--normalization",
-                    "1.0",
-                    "-m",
-                    model_info["full_name"],
-                    "--model_file_dir",
-                    os.path.join(now_dir, "models", "denoise"),
-                    "--output_dir",
-                    store_dir,
-                ]
-                subprocess.run(command)
+                separator = Separator(
+                    model_file_dir=os.path.join(now_dir, "models", "denoise"),
+                    log_level="warning",
+                    normalization_threshold="1.0",
+                    output_format="flac",
+                    output_dir=store_dir
+                )
+                separator.load_model(model_filename=model_info["full_name"])
+                separator.separate(input_file)
 
     # RVC
     denoise_path = os.path.join(now_dir, "audio_files", "denoise")
