@@ -383,6 +383,7 @@ def full_inference_program(
                 output_dir=store_dir,
                 vr_params= {
                     "batch_size": batch_size,
+                    "enable_tta": use_tta,
                 }
             )
             separator.load_model(model_filename=model_info["full_name"])
@@ -446,6 +447,7 @@ def full_inference_program(
                 output_dir=store_dir,
                 vr_params= {
                     "batch_size": batch_size,
+                    "enable_tta": use_tta,
                 }
             )
             separator.load_model(model_filename=model_info["full_name"])
@@ -476,6 +478,7 @@ def full_inference_program(
                 output_dir=store_dir,
                 vr_params= {
                     "batch_size": batch_size,
+                    "enable_tta": use_tta,
                 }
             )
             separator.load_model(model_filename=model_info["full_name"])
@@ -553,6 +556,7 @@ def full_inference_program(
                     output_dir=store_dir,
                     vr_params= {
                         "batch_size": batch_size,
+                        "enable_tta": use_tta,
                     }
                 )
                 separator.load_model(model_filename=model_info["full_name"])
