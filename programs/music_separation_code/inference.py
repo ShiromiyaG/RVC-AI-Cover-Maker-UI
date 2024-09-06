@@ -145,4 +145,4 @@ def proc_file(model_type, config_path, start_check_point, input_file, store_dir,
     print("Model load time: {:.2f} sec".format(time.time() - model_load_start_time))
     args = Args(input_file, store_dir, model_type, extract_instrumental, disable_detailed_pbar, flac_file, pcm_type, use_tta)
 
-    run_file(model, args, config, device, verbose=False)
+    run_file(model, args, config, device, verbose=True)
