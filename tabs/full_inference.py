@@ -391,7 +391,7 @@ def full_inference_tab():
                     step=1,
                     label=i18n("Batch Size"),
                     info=i18n("Set the batch size for the separation."),
-                    value=2,
+                    value=1,
                     interactive=True,
                 )
                 vocal_model = gr.Dropdown(
