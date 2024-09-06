@@ -135,7 +135,7 @@ def max_vram_gpu(gpu):
     if torch.cuda.is_available():
         gpu_properties = torch.cuda.get_device_properties(gpu)
         total_memory_gb = round(gpu_properties.total_memory / 1024 / 1024 / 1024)
-        return total_memory_gb - 2
+        return total_memory_gb / 2
     else:
         return "0"
 
@@ -388,9 +388,10 @@ def full_inference_tab():
                 batch_size = gr.Slider(
                     minimum=1,
                     maximum=24,
+                    step=1,
                     label=i18n("Batch Size"),
                     info=i18n("Set the batch size for the separation."),
-                    value=max_vram_gpu(0),
+                    value=2,
                     interactive=True,
                 )
                 vocal_model = gr.Dropdown(
