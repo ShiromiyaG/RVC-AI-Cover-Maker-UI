@@ -7,7 +7,7 @@ from pedalboard import Pedalboard, Reverb
 from pedalboard.io import AudioFile
 from pydub import AudioSegment
 from audio_separator.separator import Separator
-
+import logging
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -275,6 +275,7 @@ def full_inference_program(
     embedder_model,
     delete_audios,
     use_tta,
+    batch_size,
 ):
     # Configuração de devices
     if devices == "-":
@@ -376,10 +377,13 @@ def full_inference_program(
         else:
             separator = Separator(
                 model_file_dir=os.path.join(now_dir, "models", "karaoke"),
-                log_level="warning",
-                normalization_threshold="1.0",
+                log_level=logging.WARNING,
+                normalization_threshold=1.0,
                 output_format="flac",
-                output_dir=store_dir
+                output_dir=store_dir,
+                vr_params= {
+                    "batch_size": batch_size,
+                }
             )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
@@ -436,10 +440,13 @@ def full_inference_program(
         else:
             separator = Separator(
                 model_file_dir=os.path.join(now_dir, "models", "dereverb"),
-                log_level="warning",
-                normalization_threshold="1.0",
+                log_level=logging.WARNING,
+                normalization_threshold=1.0,
                 output_format="flac",
-                output_dir=store_dir
+                output_dir=store_dir,
+                vr_params= {
+                    "batch_size": batch_size,
+                }
             )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
@@ -463,10 +470,13 @@ def full_inference_program(
 
             separator = Separator(
                 model_file_dir=os.path.join(now_dir, "models", "deecho"),
-                log_level="warning",
-                normalization_threshold="1.0",
+                log_level=logging.WARNING,
+                normalization_threshold=1.0,
                 output_format="flac",
-                output_dir=store_dir
+                output_dir=store_dir,
+                vr_params= {
+                    "batch_size": batch_size,
+                }
             )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
@@ -537,10 +547,13 @@ def full_inference_program(
             else:
                 separator = Separator(
                     model_file_dir=os.path.join(now_dir, "models", "denoise"),
-                    log_level="warning",
-                    normalization_threshold="1.0",
+                    log_level=logging.WARNING,
+                    normalization_threshold=1.0,
                     output_format="flac",
-                    output_dir=store_dir
+                    output_dir=store_dir,
+                    vr_params= {
+                        "batch_size": batch_size,
+                    }
                 )
                 separator.load_model(model_filename=model_info["full_name"])
                 separator.separate(input_file)

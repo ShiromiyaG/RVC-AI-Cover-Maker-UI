@@ -22,6 +22,17 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
+class Args:
+    def __init__(self, input_file, store_dir, model_type, extract_instrumental, disable_detailed_pbar, flac_file, pcm_type, use_tta):
+        self.input_file = input_file
+        self.model_type = model_type
+        self.store_dir = store_dir
+        self.extract_instrumental = extract_instrumental
+        self.disable_detailed_pbar = disable_detailed_pbar
+        self.flac_file = flac_file
+        self.pcm_type = pcm_type
+        self.use_tta = use_tta
+
 def run_file(model, args, config, device, verbose=False):
     start_time = time.time()
     model.eval()
@@ -132,5 +143,6 @@ def proc_file(model_type, config_path, start_check_point, input_file, store_dir,
     model = model.to(device)
 
     print("Model load time: {:.2f} sec".format(time.time() - model_load_start_time))
+    args = Args(input_file, store_dir, model_type, extract_instrumental, disable_detailed_pbar, flac_file, pcm_type, use_tta)
 
-    run_file(model, input_file, store_dir, config, device, extract_instrumental, disable_detailed_pbar, flac_file, pcm_type, use_tta, verbose=True)
+    run_file(model, args, config, device, verbose=False)

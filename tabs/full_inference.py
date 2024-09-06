@@ -18,8 +18,6 @@ audio_root = os.path.join(now_dir, "audio_files", "original_files")
 model_root_relative = os.path.relpath(model_root, now_dir)
 audio_root_relative = os.path.relpath(audio_root, now_dir)
 
-output_path = os.path.join(now_dir, "audio_files", "rvc", "output.wav")
-
 sup_audioext = {
     "wav",
     "mp3",
@@ -133,6 +131,13 @@ def get_number_of_gpus():
     else:
         return "-"
 
+def max_vram_gpu(gpu):
+    if torch.cuda.is_available():
+        gpu_properties = torch.cuda.get_device_properties(gpu)
+        total_memory_gb = round(gpu_properties.total_memory / 1024 / 1024 / 1024)
+        return total_memory_gb
+    else:
+        return "0"
 
 def format_title(title):
     formatted_title = (
@@ -255,6 +260,16 @@ def full_inference_tab():
                 )
         with gr.Accordion(i18n("Advanced Settings"), open=False):
             with gr.Accordion(i18n("RVC Settings"), open=False):
+                output_path = gr.Textbox(
+                    label=i18n("Output Path"),
+                    placeholder=i18n("Enter output path"),
+                    info=i18n(
+                        "The path where the output audio will be saved, by default in audio_files/rvc/output.wav"
+                    ),
+                    value=(os.path.join(now_dir, "audio_files", "rvc", "output.wav")),
+                    interactive=False,
+                    visible=False,
+                )
                 clear_outputs_infer = gr.Button(
                     i18n("Clear Outputs (Deletes all audios in assets/audios)")
                 )
@@ -368,6 +383,14 @@ def full_inference_tab():
                     info=i18n("Use Test Time Augmentation."),
                     visible=True,
                     value=False,
+                    interactive=True,
+                )
+                batch_size = gr.Slider(
+                    minimum=1,
+                    maximum=24,
+                    label=i18n("Batch Size"),
+                    info=i18n("Set the batch size for the separation."),
+                    value=max_vram_gpu(0),
                     interactive=True,
                 )
                 vocal_model = gr.Dropdown(
@@ -611,6 +634,7 @@ def full_inference_tab():
             embedder_model,
             delete_audios,
             use_tta,
+            batch_size,
         ],
         outputs=[vc_output1, vc_output2],
     )
