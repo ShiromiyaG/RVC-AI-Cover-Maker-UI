@@ -154,7 +154,7 @@ def download_file(url, path, filename):
 
 
 def get_model_info_by_name(model_name):
-    all_models = models_vocals + karaoke_models + dereverb_models + deecho_models
+    all_models = models_vocals + karaoke_models + dereverb_models + deecho_models + denoise_models
     for model in all_models:
         if model["name"] == model_name:
             return model
