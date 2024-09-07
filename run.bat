@@ -53,10 +53,7 @@ if not exist env (
     echo.
 )
 
-call "%CONDA_ROOT_PREFIX%\Scripts\activate.bat" "%INSTALL_ENV_DIR%"
-if errorlevel 1 goto :error
-
-python main.py --open
+env\python main.py --open
 if errorlevel 1 goto :error
 
 goto :eof
