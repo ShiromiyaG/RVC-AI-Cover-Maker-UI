@@ -1,14 +1,12 @@
 @echo off
 setlocal
 title RVC AI Cover Maker
-
-
-if not exist env(
-    set "principal=%cd%"
-    set "CONDA_ROOT_PREFIX=%UserProfile%\Miniconda3"
-    set "INSTALL_ENV_DIR=%principal%\env"
-    set "MINICONDA_DOWNLOAD_URL=https://repo.anaconda.com/miniconda/Miniconda3-py39_23.9.0-0-Windows-x86_64.exe"
-    set "CONDA_EXECUTABLE=%CONDA_ROOT_PREFIX%\Scripts\conda.exe"
+set "principal=%cd%"
+set "CONDA_ROOT_PREFIX=%UserProfile%\Miniconda3"
+set "INSTALL_ENV_DIR=%principal%\env"
+set "MINICONDA_DOWNLOAD_URL=https://repo.anaconda.com/miniconda/Miniconda3-py39_23.9.0-0-Windows-x86_64.exe"
+set "CONDA_EXECUTABLE=%CONDA_ROOT_PREFIX%\Scripts\conda.exe"
+if not exist env (
     if not exist "%CONDA_EXECUTABLE%" (
         echo Miniconda not found. Starting download and installation...
         echo Downloading Miniconda...
@@ -46,26 +44,23 @@ if not exist env(
     )
 
     echo Installing dependencies...
-    call "%CONDA_ROOT_PREFIX%\condabin\conda.bat" activate "%INSTALL_ENV_DIR%" || goto :error
-    pip install --upgrade setuptools || goto :error
-    pip install --no-deps -r "%principal%\requirements.txt" || goto :error
-    pip uninstall torch torchvision torchaudio -y
-    pip install torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu121 || goto :error
-    call "%CONDA_ROOT_PREFIX%\condabin\conda.bat" deactivate
-    echo Dependencies installation complete.
+    "%INSTALL_ENV_DIR%\python.exe" -m pip install --no-deps -r requirements.txt
+    if errorlevel 1 goto :error
+    echo Dependencies installed successfully.
     echo.
 )
 
-if not exist "programs/applio_code/rvc/models"(
-    python programs/applio_code/rvc/lib/tools/prerequisites_download.py
-)
+echo Activating Conda environment...
+call "%CONDA_ROOT_PREFIX%\Scripts\activate.bat" "%INSTALL_ENV_DIR%"
+if errorlevel 1 goto :error
 
-env\python.exe main.py --open
-echo.
-pause
-exit /b 0
+echo Running main script...
+python main.py
+if errorlevel 1 goto :error
+
+goto :eof
 
 :error
-echo An error occurred during installation. Please check the output above for details.
+echo An error occurred. Exiting...
 pause
 exit /b 1
