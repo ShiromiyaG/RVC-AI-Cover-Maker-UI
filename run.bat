@@ -37,24 +37,25 @@ if not exist env (
 
     if exist "%INSTALL_ENV_DIR%\python.exe" (
         echo Installing specific pip version...
-        "%INSTALL_ENV_DIR%\python.exe" -m pip install "pip<24.1"
+        "%INSTALL_ENV_DIR%\python.exe" -m pip install --no-warn-script-location "pip<24.1"
         if errorlevel 1 goto :error
         echo Pip installation complete.
         echo.
     )
 
     echo Installing dependencies...
-    "%INSTALL_ENV_DIR%\python.exe" -m pip install --no-deps -r requirements.txt
+    "%INSTALL_ENV_DIR%\python.exe" -m pip install --no-warn-script-location --no-deps -r requirements.txt
+    "%INSTALL_ENV_DIR%\python.exe" -m pip uninstall torch torchvision torchaudio -y
+    "%INSTALL_ENV_DIR%\python.exe" -m pip install --no-warn-script-location torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu121
     if errorlevel 1 goto :error
+    cls
     echo Dependencies installed successfully.
     echo.
 )
 
-echo Activating Conda environment...
 call "%CONDA_ROOT_PREFIX%\Scripts\activate.bat" "%INSTALL_ENV_DIR%"
 if errorlevel 1 goto :error
 
-echo Running main script...
 python main.py
 if errorlevel 1 goto :error
 
