@@ -154,7 +154,13 @@ def download_file(url, path, filename):
 
 
 def get_model_info_by_name(model_name):
-    all_models = models_vocals + karaoke_models + dereverb_models + deecho_models + denoise_models
+    all_models = (
+        models_vocals
+        + karaoke_models
+        + dereverb_models
+        + deecho_models
+        + denoise_models
+    )
     for model in all_models:
         if model["name"] == model_name:
             return model
@@ -174,7 +180,12 @@ def search_with_word(folder, word):
     if not os.path.isdir(folder):
         raise NotADirectoryError(f"{folder} is not a valid directory.")
     file_with_word = [file for file in os.listdir(folder) if word in file]
-    return file_with_word[-1] if file_with_word else None
+    if not file_with_word:
+        return None
+    most_recent_file = max(
+        file_with_word, key=lambda file: os.path.getmtime(os.path.join(folder, file))
+    )
+    return most_recent_file
 
 
 def get_last_modified_folder(path):
@@ -283,9 +294,9 @@ def full_inference_program(
     else:
         devices = devices.split("-")
         if type(devices) == list:
-            device = f'cuda:{devices[0]}'
+            device = f"cuda:{devices[0]}"
         else:
-            device = f'cuda:{devices}'
+            device = f"cuda:{devices}"
     # Vocals Separation
     model_info = get_model_info_by_name(vocal_model)
     model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
@@ -381,10 +392,10 @@ def full_inference_program(
                 normalization_threshold=1.0,
                 output_format="flac",
                 output_dir=store_dir,
-                vr_params= {
+                vr_params={
                     "batch_size": batch_size,
                     "enable_tta": use_tta,
-                }
+                },
             )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
@@ -445,10 +456,10 @@ def full_inference_program(
                 normalization_threshold=1.0,
                 output_format="flac",
                 output_dir=store_dir,
-                vr_params= {
+                vr_params={
                     "batch_size": batch_size,
                     "enable_tta": use_tta,
-                }
+                },
             )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
@@ -476,10 +487,10 @@ def full_inference_program(
                 normalization_threshold=1.0,
                 output_format="flac",
                 output_dir=store_dir,
-                vr_params= {
+                vr_params={
                     "batch_size": batch_size,
                     "enable_tta": use_tta,
-                }
+                },
             )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
@@ -518,7 +529,10 @@ def full_inference_program(
                 )
             )
 
-            if model_info["name"] == "Mel-Roformer Denoise Normal by aufr33" or model_info["mame"] == "Mel-Roformer Denoise Aggressive by aufr33":
+            if (
+                model_info["name"] == "Mel-Roformer Denoise Normal by aufr33"
+                or model_info["mame"] == "Mel-Roformer Denoise Aggressive by aufr33"
+            ):
                 model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
                 if not os.path.exists(model_ckpt_path):
                     download_file(
@@ -529,9 +543,7 @@ def full_inference_program(
                 config_json_path = os.path.join(model_info["path"], "config.yaml")
                 if not os.path.exists(config_json_path):
                     download_file(
-                        model_info["config_url"],
-                        model_info["path"],
-                        "config.yaml"
+                        model_info["config_url"], model_info["path"], "config.yaml"
                     )
                 proc_file(
                     model_type=model_info["type"],
@@ -554,10 +566,10 @@ def full_inference_program(
                     normalization_threshold=1.0,
                     output_format="flac",
                     output_dir=store_dir,
-                    vr_params= {
+                    vr_params={
                         "batch_size": batch_size,
                         "enable_tta": use_tta,
-                    }
+                    },
                 )
                 separator.load_model(model_filename=model_info["full_name"])
                 separator.separate(input_file)
