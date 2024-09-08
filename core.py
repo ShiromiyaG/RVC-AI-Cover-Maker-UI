@@ -781,9 +781,7 @@ def download_model(link):
 
 
 def download_music(link):
-    os.path.makedirs(
-        os.path.join(now_dir, "audio_files", "original_files"), exist_ok=True
-    )
+    os.makedirs(os.path.join(now_dir, "audio_files", "original_files"), exist_ok=True)
     command = [
         "yt-dlp",
         "-x",
