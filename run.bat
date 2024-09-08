@@ -53,7 +53,7 @@ if not exist env (
     echo.
 )
 
-env\python programs/applio_code/rvc/lib/tools/prerequisites_download.py
+env\python programs\applio_code\rvc\lib\tools\prerequisites_download.py
 
 env\python main.py --open
 if errorlevel 1 goto :error
