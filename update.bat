@@ -9,7 +9,7 @@ cd /d %~dp0
 
 REM Loop through all directories except "env", "logs", "audio_files", and "programs/applio_code/rvc/models"
 for /d %%D in (*) do (
-    if /i not "%%D"=="env" if /i not "%%D"=="logs" if /i not "%%D"=="audio_files" if /i not "%%D"=="programs" (
+    if /i not "%%D"=="env" if /i not "%%D"=="logs" if /i not "%%D"=="audio_files" if /i not "%%D"=="models" if /i not "%%D"=="programs" (
         echo Deleting directory %%D
         rmdir /s /q "%%D"
     )
