@@ -344,7 +344,7 @@ def full_inference_program(
     else:
         if input_file:
             input_file = os.path.join(vocals_path, input_file)
-        print("Separating Bakcing vocals")
+        print("Separating Backing vocals")
         if model_info["name"] == "Mel-Roformer Karaoke by aufr33 and viperx":
             model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
             if not os.path.exists(model_ckpt_path):
