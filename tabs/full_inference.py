@@ -131,6 +131,7 @@ def get_number_of_gpus():
     else:
         return "-"
 
+
 def max_vram_gpu(gpu):
     if torch.cuda.is_available():
         gpu_properties = torch.cuda.get_device_properties(gpu)
@@ -138,6 +139,7 @@ def max_vram_gpu(gpu):
         return total_memory_gb / 2
     else:
         return "0"
+
 
 def format_title(title):
     formatted_title = (
@@ -270,6 +272,13 @@ def full_inference_tab():
                     value=(os.path.join(now_dir, "audio_files", "rvc", "output.wav")),
                     interactive=False,
                     visible=False,
+                )
+                infer_backing_vocals = gr.Checkbox(
+                    label=i18n("Infer Backing Vocals"),
+                    info=i18n("Infer the bakcing vocals too."),
+                    visible=True,
+                    value=False,
+                    interactive=True,
                 )
                 clear_outputs_infer = gr.Button(
                     i18n("Clear Outputs (Deletes all audios in assets/audios)")
@@ -637,6 +646,7 @@ def full_inference_tab():
             delete_audios,
             use_tta,
             batch_size,
+            infer_backing_vocals,
         ],
         outputs=[vc_output1, vc_output2],
     )

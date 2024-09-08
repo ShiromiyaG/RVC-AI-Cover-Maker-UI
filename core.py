@@ -287,6 +287,7 @@ def full_inference_program(
     delete_audios,
     use_tta,
     batch_size,
+    infer_backing_vocals,
 ):
     # Configuração de devices
     if devices == "-":
@@ -619,6 +620,37 @@ def full_inference_program(
         export_format=export_format_rvc,
         embedder_model_custom=None,
     )
+    if infer_backing_vocals:
+        print("Infering backing vocals")
+        karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
+        karaoke_file = search_with_word(
+            karaoke_path, "Instrumental"
+        ) or search_with_word(karaoke_path, "instrumental")
+        karaoke_file = os.path.join(karaoke_path, karaoke_file)
+        backing_vocals = os.path.join(now_dir, "audio_files", "karaoke", karaoke_file)
+        input_audio_basename = os.path.basename(input_audio_path)
+        output_backing_vocals = os.path.join(
+            now_dir, "audio_files", "karaoke", f"{input_audio_basename}_instrumental"
+        )
+        inference_vc.convert_audio(
+            audio_input_path=backing_vocals,
+            audio_output_path=output_backing_vocals,
+            model_path=model_path,
+            index_path=index_path,
+            embedder_model=embedder_model,
+            pitch=pitch,
+            f0_file=None,
+            f0_method=pitch_extract,
+            filter_radius=filter_radius,
+            index_rate=index_rate,
+            volume_envelope=rms_mix_rate,
+            protect=protect,
+            split_audio=split_audio,
+            f0_autotune=autotune,
+            hop_length=hop_lenght,
+            export_format=export_format_rvc,
+            embedder_model_custom=None,
+        )
     # post process
     if reverb:
         add_audio_effects(
