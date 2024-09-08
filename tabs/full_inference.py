@@ -269,7 +269,7 @@ def full_inference_tab():
                     info=i18n(
                         "The path where the output audio will be saved, by default in audio_files/rvc/output.wav"
                     ),
-                    value=(os.path.join(now_dir, "audio_files", "rvc", "output.wav")),
+                    value=os.path.join(now_dir, "audio_files", "rvc"),
                     interactive=False,
                     visible=False,
                 )

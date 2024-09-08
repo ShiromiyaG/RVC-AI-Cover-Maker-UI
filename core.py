@@ -188,6 +188,20 @@ def search_with_word(folder, word):
     return most_recent_file
 
 
+def search_with_two_words(folder, word1, word2):
+    if not os.path.isdir(folder):
+        raise NotADirectoryError(f"{folder} is not a valid directory.")
+    file_with_words = [
+        file for file in os.listdir(folder) if word1 in file and word2 in file
+    ]
+    if not file_with_words:
+        return None
+    most_recent_file = max(
+        file_with_words, key=lambda file: os.path.getmtime(os.path.join(folder, file))
+    )
+    return most_recent_file
+
+
 def get_last_modified_folder(path):
     directories = [
         os.path.join(path, d)
@@ -318,7 +332,10 @@ def full_inference_program(
     inst_dir = os.path.join(now_dir, "audio_files", "instrumentals")
     os.makedirs(store_dir, exist_ok=True)
     os.makedirs(inst_dir, exist_ok=True)
-    if search_with_word(store_dir, "vocals") != None:
+    if (
+        search_with_two_words(store_dir, os.path.basename(input_audio_path), "vocals")
+        != None
+    ):
         print("Vocals already separated"),
     else:
         print("Separating vocals")
@@ -349,8 +366,12 @@ def full_inference_program(
     vocals_path = os.path.join(now_dir, "audio_files", "vocals")
     input_file = search_with_word(vocals_path, "vocals")
     if (
-        search_with_word(store_dir, "karaoke") != None
-        or search_with_word(store_dir, "Vocals") != None
+        search_with_two_words(store_dir, os.path.basename(input_audio_path), "karaoke")
+        != None
+        or search_with_two_words(
+            store_dir, os.path.basename(input_audio_path), "Vocals"
+        )
+        != None
     ):
         print("Backing vocals already separated")
     else:
@@ -410,8 +431,12 @@ def full_inference_program(
         karaoke_path, "Vocals"
     )
     if (
-        search_with_word(store_dir, "noreverb") != None
-        or search_with_word(store_dir, "No Reverb") != None
+        search_with_two_words(store_dir, os.path.basename(input_audio_path), "noreverb")
+        != None
+        or search_with_two_words(
+            store_dir, os.path.basename(input_audio_path), "No Reverb"
+        )
+        != None
     ):
         print("Reverb already removed")
     else:
@@ -469,7 +494,12 @@ def full_inference_program(
     store_dir = os.path.join(now_dir, "audio_files", "deecho")
     os.makedirs(store_dir, exist_ok=True)
     if deecho:
-        if search_with_word(store_dir, "No Echo") != None:
+        if (
+            search_with_two_words(
+                store_dir, os.path.basename(input_audio_path), "No Echo"
+            )
+            != None
+        ):
             print("Echo already removed")
         else:
             print("Removing echo")
@@ -500,8 +530,15 @@ def full_inference_program(
     store_dir = os.path.join(now_dir, "audio_files", "denoise")
     os.makedirs(store_dir, exist_ok=True)
     if denoise:
-        if search_with_word(store_dir, "No Noise") != None or search_with_word(
-            store_dir, "dry" != None
+        if (
+            search_with_two_words(
+                store_dir, os.path.basename(input_audio_path), "No Noise"
+            )
+            != None
+            or search_with_two_words(
+                store_dir, os.path.basename(input_audio_path), "dry"
+            )
+            != None
         ):
             print("Noise already removed")
         else:
@@ -580,12 +617,16 @@ def full_inference_program(
     deecho_path = os.path.join(now_dir, "audio_files", "deecho")
     dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
 
-    denoise_audio = search_with_word(denoise_path, "No Noise") or search_with_word(
-        denoise_path, "dry"
+    denoise_audio = search_with_two_words(
+        denoise_path, os.path.basename(input_audio_path), "No Noise"
+    ) or search_with_two_words(denoise_path, os.path.basename(input_audio_path), "dry")
+    deecho_audio = search_with_two_words(
+        deecho_path, os.path.basename(input_audio_path), "No Echo"
     )
-    deecho_audio = search_with_word(deecho_path, "No Echo")
-    dereverb = search_with_word(dereverb_path, "No Reverb") or search_with_word(
-        dereverb_path, "noreverb"
+    dereverb = search_with_two_words(
+        dereverb_path, os.path.basename(input_audio_path), "No Reverb"
+    ) or search_with_two_words(
+        dereverb_path, os.path.basename(input_audio_path), "noreverb"
     )
 
     if denoise_audio:
@@ -600,10 +641,16 @@ def full_inference_program(
     store_dir = os.path.join(now_dir, "audio_files", "rvc")
     os.makedirs(store_dir, exist_ok=True)
     print("Making RVC inference")
+    output_rvc = os.path.join(
+        now_dir,
+        "audio_files",
+        "rvc",
+        f"{os.path.basename(input_audio_path).split('.')[0]}_rvc.wav",
+    )
     inference_vc = import_voice_converter()
     inference_vc.convert_audio(
         audio_input_path=final_path,
-        audio_output_path=output_path,
+        audio_output_path=output_rvc,
         model_path=model_path,
         index_path=index_path,
         embedder_model=embedder_model,
@@ -628,9 +675,12 @@ def full_inference_program(
         ) or search_with_word(karaoke_path, "instrumental")
         karaoke_file = os.path.join(karaoke_path, karaoke_file)
         backing_vocals = os.path.join(now_dir, "audio_files", "karaoke", karaoke_file)
-        input_audio_basename = os.path.basename(input_audio_path)
+        input_audio_basename = os.path.basename(input_audio_path).split(".")[0]
         output_backing_vocals = os.path.join(
-            now_dir, "audio_files", "karaoke", f"{input_audio_basename}_instrumental"
+            now_dir,
+            "audio_files",
+            "karaoke",
+            f"{input_audio_basename}_instrumental.wav",
         )
         inference_vc.convert_audio(
             audio_input_path=backing_vocals,
