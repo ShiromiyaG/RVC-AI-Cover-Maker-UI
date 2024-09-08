@@ -333,7 +333,9 @@ def full_inference_program(
     os.makedirs(store_dir, exist_ok=True)
     os.makedirs(inst_dir, exist_ok=True)
     if (
-        search_with_two_words(store_dir, os.path.basename(input_audio_path), "vocals")
+        search_with_two_words(
+            store_dir, os.path.basename(input_audio_path).split(".")[0], "vocals"
+        )
         != None
     ):
         print("Vocals already separated"),
@@ -366,10 +368,12 @@ def full_inference_program(
     vocals_path = os.path.join(now_dir, "audio_files", "vocals")
     input_file = search_with_word(vocals_path, "vocals")
     if (
-        search_with_two_words(store_dir, os.path.basename(input_audio_path), "karaoke")
+        search_with_two_words(
+            store_dir, os.path.basename(input_audio_path).split(".")[0], "karaoke"
+        )
         != None
         or search_with_two_words(
-            store_dir, os.path.basename(input_audio_path), "Vocals"
+            store_dir, os.path.basename(input_audio_path).split(".")[0], "Vocals"
         )
         != None
     ):
@@ -431,10 +435,12 @@ def full_inference_program(
         karaoke_path, "Vocals"
     )
     if (
-        search_with_two_words(store_dir, os.path.basename(input_audio_path), "noreverb")
+        search_with_two_words(
+            store_dir, os.path.basename(input_audio_path).split(".")[0], "noreverb"
+        )
         != None
         or search_with_two_words(
-            store_dir, os.path.basename(input_audio_path), "No Reverb"
+            store_dir, os.path.basename(input_audio_path).split(".")[0], "No Reverb"
         )
         != None
     ):
@@ -496,7 +502,7 @@ def full_inference_program(
     if deecho:
         if (
             search_with_two_words(
-                store_dir, os.path.basename(input_audio_path), "No Echo"
+                store_dir, os.path.basename(input_audio_path).split(".")[0], "No Echo"
             )
             != None
         ):
@@ -532,11 +538,11 @@ def full_inference_program(
     if denoise:
         if (
             search_with_two_words(
-                store_dir, os.path.basename(input_audio_path), "No Noise"
+                store_dir, os.path.basename(input_audio_path).split(".")[0], "No Noise"
             )
             != None
             or search_with_two_words(
-                store_dir, os.path.basename(input_audio_path), "dry"
+                store_dir, os.path.basename(input_audio_path).split(".")[0], "dry"
             )
             != None
         ):
@@ -618,15 +624,17 @@ def full_inference_program(
     dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
 
     denoise_audio = search_with_two_words(
-        denoise_path, os.path.basename(input_audio_path), "No Noise"
-    ) or search_with_two_words(denoise_path, os.path.basename(input_audio_path), "dry")
+        denoise_path, os.path.basename(input_audio_path).split(".")[0], "No Noise"
+    ) or search_with_two_words(
+        denoise_path, os.path.basename(input_audio_path).split(".")[0], "dry"
+    )
     deecho_audio = search_with_two_words(
-        deecho_path, os.path.basename(input_audio_path), "No Echo"
+        deecho_path, os.path.basename(input_audio_path).split(".")[0], "No Echo"
     )
     dereverb = search_with_two_words(
-        dereverb_path, os.path.basename(input_audio_path), "No Reverb"
+        dereverb_path, os.path.basename(input_audio_path).split(".")[0], "No Reverb"
     ) or search_with_two_words(
-        dereverb_path, os.path.basename(input_audio_path), "noreverb"
+        dereverb_path, os.path.basename(input_audio_path).split(".")[0], "noreverb"
     )
 
     if denoise_audio:
@@ -645,7 +653,7 @@ def full_inference_program(
         now_dir,
         "audio_files",
         "rvc",
-        f"{os.path.basename(input_audio_path).split('.')[0]}_rvc.wav",
+        f"{os.path.basename(input_audio_path).split('.')[0].split('.')[0]}_rvc.wav",
     )
     inference_vc = import_voice_converter()
     inference_vc.convert_audio(
@@ -716,7 +724,10 @@ def full_inference_program(
             reverb_damping,
             reverb_width,
             os.path.join(
-                now_dir, "audio_files", "rvc", os.path.basename(input_audio_path)
+                now_dir,
+                "audio_files",
+                "rvc",
+                os.path.basename(input_audio_path).split(".")[0],
             ),
         )
 
@@ -759,7 +770,7 @@ def full_inference_program(
             if os.path.isdir(folder_path) and folder_name != folder_to_keep:
                 shutil.rmtree(folder_path)
     return (
-        f"Audio file {os.path.basename(input_audio_path)} converted with success",
+        f"Audio file {os.path.basename(input_audio_path).split('.')[0]} converted with success",
         result,
     )
 
