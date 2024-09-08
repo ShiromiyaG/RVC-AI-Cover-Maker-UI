@@ -610,7 +610,12 @@ def full_inference_program(
     # post process
     if reverb:
         add_audio_effects(
-            get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc")),
+            os.path.join(
+                now_dir,
+                "audio_files",
+                "rvc",
+                get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc")),
+            ),
             reverb_room_size,
             reverb_wet_gain,
             reverb_dry_gain,
