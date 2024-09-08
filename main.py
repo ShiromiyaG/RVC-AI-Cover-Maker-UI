@@ -17,7 +17,9 @@ import assets.themes.load_theme as loadThemes
 
 rvc_theme = loadThemes.load_json() or "ParityError/Interstellar"
 
-with gr.Blocks(theme=rvc_theme, title="RVC AI Cover Maker") as RVCAICoverMaker:
+with gr.Blocks(
+    theme=rvc_theme, title="RVC AI Cover Maker", css="footer{display:none !important}"
+) as RVCAICoverMaker:
     gr.Markdown("# RVC AI Cover Maker")
     with gr.Tab(i18n("Full Inference")):
         full_inference_tab()
