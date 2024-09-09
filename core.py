@@ -356,10 +356,25 @@ def full_inference_program(
             use_tta=use_tta,
         )
         os.rename(
-            os.path.join(store_dir, search_with_word(store_dir, "instrumental")),
-            os.path.join(inst_dir, "instrumentals.flac"),
+            os.path.join(
+                store_dir,
+                search_with_two_words(
+                    store_dir,
+                    os.path.basename(input_audio_path).split(".")[0],
+                    "instrumental",
+                ),
+            ),
+            os.path.join(
+                inst_dir,
+                f"{os.path.basename(input_audio_path).split('.')[0]}_instrumentals.flac",
+            ),
         )
-    inst_file = os.path.join(inst_dir, "instrumentals.flac")
+    inst_file = os.path.join(
+        inst_dir,
+        search_with_two_words(
+            inst_dir, os.path.basename(input_audio_path).split(".")[0], "instrumentals"
+        ),
+    )
 
     # karaoke separation
     model_info = get_model_info_by_name(karaoke_model)
