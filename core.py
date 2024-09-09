@@ -55,7 +55,11 @@ karaoke_models = [
         "config_url": "https://huggingface.co/shiromiya/audio-separation-models/resolve/main/mel_band_roformer_karaoke_aufr33_viperx/config_mel_band_roformer_karaoke.yaml",
         "model_url": "https://huggingface.co/shiromiya/audio-separation-models/resolve/main/mel_band_roformer_karaoke_aufr33_viperx/mel_band_roformer_karaoke_aufr33_viperx_sdr_10.1956.ckpt",
     },
-    {"name": "UVR-BVE", "full_name": "UVR-BVE-4B_SN-44100-1.pth"},
+    {
+        "name": "UVR-BVE",
+        "full_name": "UVR-BVE-4B_SN-44100-1.pth",
+        "arch": "vr",
+    },
 ]
 
 denoise_models = [
@@ -80,6 +84,7 @@ denoise_models = [
     {
         "name": "UVR Denoise",
         "full_name": "UVR-DeNoise.pth",
+        "arch": "vr",
     },
 ]
 
@@ -105,10 +110,12 @@ dereverb_models = [
     {
         "name": "UVR-Deecho-Dereverb",
         "full_name": "UVR-DeEcho-DeReverb.pth",
+        "arch": "vr",
     },
     {
         "name": "MDX Reverb HQ by FoxJoy",
         "full_name": "Reverb_HQ_By_FoxJoy.onnx",
+        "arch": "mdx",
     },
 ]
 
@@ -116,10 +123,12 @@ deecho_models = [
     {
         "name": "UVR-Deecho-Normal",
         "full_name": "UVR-De-Echo-Normal.pth",
+        "arch": "vr",
     },
     {
         "name": "UVR-Deecho-Agggressive",
         "full_name": "UVR-De-Echo-Aggressive.pth",
+        "arch": "vr",
     },
 ]
 
@@ -332,12 +341,9 @@ def full_inference_program(
     inst_dir = os.path.join(now_dir, "audio_files", "instrumentals")
     os.makedirs(store_dir, exist_ok=True)
     os.makedirs(inst_dir, exist_ok=True)
-    if (
-        search_with_two_words(
-            store_dir, os.path.basename(input_audio_path).split(".")[0], "vocals"
-        )
-        != None
-    ):
+    input_audio_basename = os.path.splitext(os.path.basename(input_audio_path))[0]
+    search_result = search_with_two_words(store_dir, input_audio_basename, "vocals")
+    if search_result:
         print("Vocals already separated"),
     else:
         print("Separating vocals")
@@ -382,16 +388,12 @@ def full_inference_program(
     os.makedirs(store_dir, exist_ok=True)
     vocals_path = os.path.join(now_dir, "audio_files", "vocals")
     input_file = search_with_word(vocals_path, "vocals")
-    if (
-        search_with_two_words(
-            store_dir, os.path.basename(input_audio_path).split(".")[0], "karaoke"
-        )
-        != None
-        or search_with_two_words(
-            store_dir, os.path.basename(input_audio_path).split(".")[0], "Vocals"
-        )
-        != None
-    ):
+    input_audio_basename = os.path.basename(input_audio_path).split(".")[0]
+    karaoke_exists = (
+        search_with_two_words(store_dir, input_audio_basename, "karaoke") is not None
+    )
+
+    if karaoke_exists:
         print("Backing vocals already separated")
     else:
         if input_file:
@@ -440,25 +442,45 @@ def full_inference_program(
             )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
+            karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
+            vocals_result = search_with_two_words(
+                karaoke_path,
+                os.path.basename(input_audio_path).split(".")[0],
+                "Vocals",
+            )
+            instrumental_result = search_with_two_words(
+                karaoke_path,
+                os.path.basename(input_audio_path).split(".")[0],
+                "Instrumental",
+            )
+            if "UVR-BVE-4B_SN-44100-1" in os.path.basename(vocals_result):
+                os.rename(
+                    os.path.join(karaoke_path, vocals_result),
+                    os.path.join(
+                        karaoke_path,
+                        f"{os.path.basename(input_audio_path).split('.')[0]}_karaoke.flac",
+                    ),
+                )
+            if "UVR-BVE-4B_SN-44100-1" in os.path.basename(instrumental_result):
+                os.rename(
+                    os.path.join(karaoke_path, instrumental_result),
+                    os.path.join(
+                        karaoke_path,
+                        f"{os.path.basename(input_audio_path).split('.')[0]}_instrumental.flac",
+                    ),
+                )
 
     # dereverb
     model_info = get_model_info_by_name(dereverb_model)
     store_dir = os.path.join(now_dir, "audio_files", "dereverb")
     os.makedirs(store_dir, exist_ok=True)
     karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
-    input_file = search_with_word(karaoke_path, "karaoke") or search_with_word(
-        karaoke_path, "Vocals"
+    input_file = search_with_word(karaoke_path, "karaoke")
+    input_audio_basename = os.path.basename(input_audio_path).split(".")[0]
+    noreverb_exists = (
+        search_with_two_words(store_dir, input_audio_basename, "noreverb") is not None
     )
-    if (
-        search_with_two_words(
-            store_dir, os.path.basename(input_audio_path).split(".")[0], "noreverb"
-        )
-        != None
-        or search_with_two_words(
-            store_dir, os.path.basename(input_audio_path).split(".")[0], "No Reverb"
-        )
-        != None
-    ):
+    if noreverb_exists:
         print("Reverb already removed")
     else:
         if input_file:
@@ -497,39 +519,63 @@ def full_inference_program(
                 use_tta=use_tta,
             )
         else:
-            separator = Separator(
-                model_file_dir=os.path.join(now_dir, "models", "dereverb"),
-                log_level=logging.WARNING,
-                normalization_threshold=1.0,
-                output_format="flac",
-                output_dir=store_dir,
-                vr_params={
-                    "batch_size": batch_size,
-                    "enable_tta": use_tta,
-                },
-            )
+            if model_info["arch"] == "vr":
+                separator = Separator(
+                    model_file_dir=os.path.join(now_dir, "models", "dereverb"),
+                    log_level=logging.WARNING,
+                    normalization_threshold=1.0,
+                    output_format="flac",
+                    output_dir=store_dir,
+                    output_single_stem="No Reverb",
+                    vr_params={
+                        "batch_size": batch_size,
+                        "enable_tta": use_tta,
+                    },
+                )
+            else:
+                separator = Separator(
+                    model_file_dir=os.path.join(now_dir, "models", "dereverb"),
+                    log_level=logging.WARNING,
+                    normalization_threshold=1.0,
+                    output_format="flac",
+                    output_dir=store_dir,
+                    output_single_stem="No Reverb",
+                )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
+            dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
+            search_result = search_with_two_words(
+                dereverb_path,
+                os.path.basename(input_audio_path).split(".")[0],
+                "No Reverb",
+            )
+            if "UVR-DeEcho-DeReverb" in os.path.basename(
+                search_result
+            ) or "MDX Reverb HQ by FoxJoy" in os.path.basename(search_result):
+                os.rename(
+                    os.path.join(dereverb_path, search_result),
+                    os.path.join(
+                        dereverb_path,
+                        f"{os.path.basename(input_audio_path).split('.')[0]}_noreverb.flac",
+                    ),
+                )
 
     # deecho
     store_dir = os.path.join(now_dir, "audio_files", "deecho")
     os.makedirs(store_dir, exist_ok=True)
     if deecho:
-        if (
-            search_with_two_words(
-                store_dir, os.path.basename(input_audio_path).split(".")[0], "No Echo"
-            )
-            != None
-        ):
+        input_audio_basename = os.path.basename(input_audio_path).split(".")[0]
+        no_echo_exists = (
+            search_with_two_words(store_dir, input_audio_basename, "noecho") is not None
+        )
+        if no_echo_exists:
             print("Echo already removed")
         else:
             print("Removing echo")
             model_info = get_model_info_by_name(deecho_model)
 
             dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
-            noreverb_file = search_with_word(
-                dereverb_path, "noreverb"
-            ) or search_with_word(dereverb_path, "No Reverb")
+            noreverb_file = search_with_word(dereverb_path, "noreverb")
 
             input_file = os.path.join(dereverb_path, noreverb_file)
 
@@ -539,6 +585,7 @@ def full_inference_program(
                 normalization_threshold=1.0,
                 output_format="flac",
                 output_dir=store_dir,
+                output_single_stem="No Echo",
                 vr_params={
                     "batch_size": batch_size,
                     "enable_tta": use_tta,
@@ -546,21 +593,32 @@ def full_inference_program(
             )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
+            deecho_path = os.path.join(now_dir, "audio_files", "deecho")
+            search_result = search_with_two_words(
+                deecho_path,
+                os.path.basename(input_audio_path).split(".")[0],
+                "No Echo",
+            )
+            if "UVR-De-Echo-Normal" in os.path.basename(
+                search_result
+            ) or "UVR-Deecho-Agggressive" in os.path.basename(search_result):
+                os.rename(
+                    os.path.join(deecho_path, search_result),
+                    os.path.join(
+                        deecho_path,
+                        f"{os.path.basename(input_audio_path).split('.')[0]}_noecho.flac",
+                    ),
+                )
 
     # denoise
     store_dir = os.path.join(now_dir, "audio_files", "denoise")
     os.makedirs(store_dir, exist_ok=True)
     if denoise:
-        if (
-            search_with_two_words(
-                store_dir, os.path.basename(input_audio_path).split(".")[0], "No Noise"
-            )
-            != None
-            or search_with_two_words(
-                store_dir, os.path.basename(input_audio_path).split(".")[0], "dry"
-            )
-            != None
-        ):
+        input_audio_basename = os.path.basename(input_audio_path).split(".")[0]
+        no_noise_exists = (
+            search_with_two_words(store_dir, input_audio_basename, "dry") is not None
+        )
+        if no_noise_exists:
             print("Noise already removed")
         else:
             model_info = get_model_info_by_name(denoise_model)
@@ -571,7 +629,7 @@ def full_inference_program(
                     "audio_files",
                     "deecho",
                     search_with_word(
-                        os.path.join(now_dir, "audio_files", "deecho"), "No Echo"
+                        os.path.join(now_dir, "audio_files", "deecho"), "noecho"
                     ),
                 )
                 if deecho
@@ -581,9 +639,6 @@ def full_inference_program(
                     "dereverb",
                     search_with_word(
                         os.path.join(now_dir, "audio_files", "dereverb"), "noreverb"
-                    )
-                    or search_with_word(
-                        os.path.join(now_dir, "audio_files", "dereverb"), "No Reverb"
                     ),
                 )
             )
@@ -625,6 +680,7 @@ def full_inference_program(
                     normalization_threshold=1.0,
                     output_format="flac",
                     output_dir=store_dir,
+                    output_single_stem="No Noise",
                     vr_params={
                         "batch_size": batch_size,
                         "enable_tta": use_tta,
@@ -632,6 +688,19 @@ def full_inference_program(
                 )
                 separator.load_model(model_filename=model_info["full_name"])
                 separator.separate(input_file)
+                search_result = search_with_two_words(
+                    deecho_path,
+                    os.path.basename(input_audio_path).split(".")[0],
+                    "No Noise",
+                )
+                if "UVR Denoise" in os.path.basename(search_result):
+                    os.rename(
+                        os.path.join(deecho_path, search_result),
+                        os.path.join(
+                            deecho_path,
+                            f"{os.path.basename(input_audio_path).split('.')[0]}_dry.flac",
+                        ),
+                    )
 
     # RVC
     denoise_path = os.path.join(now_dir, "audio_files", "denoise")
@@ -639,16 +708,12 @@ def full_inference_program(
     dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
 
     denoise_audio = search_with_two_words(
-        denoise_path, os.path.basename(input_audio_path).split(".")[0], "No Noise"
-    ) or search_with_two_words(
         denoise_path, os.path.basename(input_audio_path).split(".")[0], "dry"
     )
     deecho_audio = search_with_two_words(
-        deecho_path, os.path.basename(input_audio_path).split(".")[0], "No Echo"
+        deecho_path, os.path.basename(input_audio_path).split(".")[0], "noecho"
     )
     dereverb = search_with_two_words(
-        dereverb_path, os.path.basename(input_audio_path).split(".")[0], "No Reverb"
-    ) or search_with_two_words(
         dereverb_path, os.path.basename(input_audio_path).split(".")[0], "noreverb"
     )
 
@@ -668,7 +733,7 @@ def full_inference_program(
         now_dir,
         "audio_files",
         "rvc",
-        f"{os.path.basename(input_audio_path).split('.')[0].split('.')[0]}_rvc.wav",
+        f"{os.path.basename(input_audio_path).split('.')[0]}_rvc.wav",
     )
     inference_vc = import_voice_converter()
     inference_vc.convert_audio(
@@ -693,17 +758,11 @@ def full_inference_program(
     if infer_backing_vocals:
         print("Infering backing vocals")
         karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
-        karaoke_file = search_with_word(
-            karaoke_path, "Instrumental"
-        ) or search_with_word(karaoke_path, "instrumental")
-        karaoke_file = os.path.join(karaoke_path, karaoke_file)
-        backing_vocals = os.path.join(now_dir, "audio_files", "karaoke", karaoke_file)
-        input_audio_basename = os.path.basename(input_audio_path).split(".")[0]
+        instrumental_file = search_with_word(karaoke_path, "instrumental")
+        backing_vocals = os.path.join(karaoke_path, instrumental_file)
+        input_audio_basename = os.path.splitext(os.path.basename(input_audio_path))[0]
         output_backing_vocals = os.path.join(
-            now_dir,
-            "audio_files",
-            "karaoke",
-            f"{input_audio_basename}_instrumental.wav",
+            karaoke_path, f"{input_audio_basename}_instrumental.wav"
         )
         inference_vc.convert_audio(
             audio_input_path=backing_vocals,
