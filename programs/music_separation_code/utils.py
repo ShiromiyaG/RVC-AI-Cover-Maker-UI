@@ -97,6 +97,7 @@ def demix_track(config, model, mix, device, pbar=False):
     windowingArray = _getWindowingArray(C, fade_size)
 
     with torch.cuda.amp.autocast(enabled=config.training.use_amp):
+        use_amp = getattr(config.training, 'use_amp', False)  
         with torch.inference_mode():
             if config.training.target_instrument is not None:
                 req_shape = (1, ) + tuple(mix.shape)

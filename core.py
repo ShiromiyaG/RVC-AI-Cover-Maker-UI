@@ -8,6 +8,7 @@ from pedalboard.io import AudioFile
 from pydub import AudioSegment
 from audio_separator.separator import Separator
 import logging
+import torch.nn as nn
 import yaml
 
 now_dir = os.getcwd()
@@ -329,10 +330,14 @@ def full_inference_program(
             device = f"cuda:{devices[0]}"
         else:
             device = f"cuda:{devices}"
+        n_gpu = torch.cuda.device_count()
+        print("Number of GPUs available:{n_gpu}")
         fp16 = check_fp16_support(device)
     else:
         device = "cpu"
+        print("Using CPU")
         fp16 = False
+
     # Vocals Separation
     model_info = get_model_info_by_name(vocal_model)
     model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
