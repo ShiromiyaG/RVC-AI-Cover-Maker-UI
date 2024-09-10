@@ -330,12 +330,11 @@ def full_inference_program(
         device = "cpu"
     else:
         devices = devices.split("-")
-        fp16 = True
+        fp16 = check_fp16_support(device)
         if type(devices) == list:
             device = f"cuda:{devices[0]}"
         else:
             device = f"cuda:{devices}"
-        fp16 = check_fp16_support(device)
     # Vocals Separation
     model_info = get_model_info_by_name(vocal_model)
     model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
