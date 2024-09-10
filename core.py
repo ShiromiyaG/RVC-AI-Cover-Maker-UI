@@ -8,6 +8,7 @@ from pedalboard.io import AudioFile
 from pydub import AudioSegment
 from audio_separator.separator import Separator
 import logging
+import yaml
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -272,6 +273,19 @@ def merge_audios(
     combined_audio.export(output_path, format=output_format)
     return output_path
 
+def check_fp16_support(device):
+    i_device = int(device.split(":")[-1])
+    gpu_name = torch.cuda.get_device_name(i_device)
+    low_end_gpus = ["16", "P40", "P10", "1060", "1070", "1080"]
+    if (
+        any(gpu in gpu_name for gpu in low_end_gpus)
+        and "V100" not in gpu_name.upper()
+    ):
+        print(
+            f"Your GPU {gpu_name} not support FP16 inference. Using FP32 instead."
+        )
+        return False
+    return True
 
 def full_inference_program(
     model_path,
@@ -312,15 +326,16 @@ def full_inference_program(
     batch_size,
     infer_backing_vocals,
 ):
-    # Configuração de devices
     if devices == "-":
         device = "cpu"
     else:
         devices = devices.split("-")
+        fp16 = True
         if type(devices) == list:
             device = f"cuda:{devices[0]}"
         else:
             device = f"cuda:{devices}"
+        fp16 = check_fp16_support(device)
     # Vocals Separation
     model_info = get_model_info_by_name(vocal_model)
     model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
@@ -337,6 +352,14 @@ def full_inference_program(
             model_info["path"],
             "config.yaml",
         )
+    if not fp16:
+        with open(model_info["config"], 'r') as file:
+            config = yaml.safe_load(file)
+
+        config['training']['use_amp'] = False
+
+        with open(model_info["config"], 'w') as file:
+            yaml.safe_dump(config, file)
     store_dir = os.path.join(now_dir, "audio_files", "vocals")
     inst_dir = os.path.join(now_dir, "audio_files", "instrumentals")
     os.makedirs(store_dir, exist_ok=True)
@@ -414,6 +437,14 @@ def full_inference_program(
                     model_info["path"],
                     "config.yaml",
                 )
+            if not fp16:
+                with open(model_info["config"], 'r') as file:
+                    config = yaml.safe_load(file)
+
+                config['training']['use_amp'] = False
+
+                with open(model_info["config"], 'w') as file:
+                    yaml.safe_dump(config, file)
             proc_file(
                 model_type=model_info["type"],
                 config_path=model_info["config"],
@@ -504,6 +535,14 @@ def full_inference_program(
                     model_info["path"],
                     "config.yaml",
                 )
+            if not fp16:
+                with open(model_info["config"], 'r') as file:
+                    config = yaml.safe_load(file)
+
+                config['training']['use_amp'] = False
+
+                with open(model_info["config"], 'w') as file:
+                    yaml.safe_dump(config, file)
             proc_file(
                 model_type=model_info["type"],
                 config_path=model_info["config"],
@@ -659,6 +698,14 @@ def full_inference_program(
                     download_file(
                         model_info["config_url"], model_info["path"], "config.yaml"
                     )
+                if not fp16:
+                    with open(model_info["config"], 'r') as file:
+                        config = yaml.safe_load(file)
+
+                    config['training']['use_amp'] = False
+
+                    with open(model_info["config"], 'w') as file:
+                        yaml.safe_dump(config, file)
                 proc_file(
                     model_type=model_info["type"],
                     config_path=model_info["config"],
