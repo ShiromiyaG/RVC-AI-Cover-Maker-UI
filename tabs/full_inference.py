@@ -128,9 +128,9 @@ def output_path_fn(input_audio_path):
 def get_number_of_gpus():
     if torch.cuda.is_available():
         num_gpus = torch.cuda.device_count()
-        return "-".join(map(str, range(num_gpus)))
+        return [f"cuda:{i}" for i in range(num_gpus)]
     else:
-        return "-"
+        return ["cpu"]
 
 def max_vram_gpu(gpu):
     if torch.cuda.is_available():

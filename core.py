@@ -317,10 +317,10 @@ def full_inference_program(
         device = "cpu"
     else:
         devices = devices.split("-")
-        if type(devices) == list:
-            device = f"cuda:{devices[0]}"
-        else:
-            device = f"cuda:{devices}"
+    if len(devices) == 1:
+        device = f"cuda:{devices[0]}"
+    else:
+        device = f"cuda:{devices[0]}"
     # Vocals Separation
     model_info = get_model_info_by_name(vocal_model)
     model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
@@ -645,7 +645,7 @@ def full_inference_program(
 
             if (
                 model_info["name"] == "Mel-Roformer Denoise Normal by aufr33"
-                or model_info["mame"] == "Mel-Roformer Denoise Aggressive by aufr33"
+                or model_info["name"] == "Mel-Roformer Denoise Aggressive by aufr33"
             ):
                 model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
                 if not os.path.exists(model_ckpt_path):
