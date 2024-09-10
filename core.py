@@ -845,7 +845,7 @@ def full_inference_program(
                 now_dir,
                 "audio_files",
                 "rvc",
-                os.path.basename(input_audio_path).split(".")[0],
+                os.path.basename(input_audio_path),
             ),
         )
 
