@@ -684,7 +684,7 @@ def full_inference_program(
 
             if (
                 model_info["name"] == "Mel-Roformer Denoise Normal by aufr33"
-                or model_info["mame"] == "Mel-Roformer Denoise Aggressive by aufr33"
+                or model_info["name"] == "Mel-Roformer Denoise Aggressive by aufr33"
             ):
                 model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
                 if not os.path.exists(model_ckpt_path):
