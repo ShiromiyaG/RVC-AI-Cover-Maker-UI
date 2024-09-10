@@ -69,7 +69,7 @@ denoise_models = [
         "model": os.path.join(now_dir, "models", "mel-denoise", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "mel-denoise", "config.yaml"),
         "type": "mel_band_roformer",
-        "config_url": "https://huggingface.co/jarredou/aufr33_MelBand_Denoise/resolve/main/model_mel_band_roformer_denoise.yaml",
+        "config_url": "https://huggingface.co/shiromiya/audio-separation-models/resolve/main/mel-denoise/model_mel_band_roformer_denoise.yaml",
         "model_url": "https://huggingface.co/jarredou/aufr33_MelBand_Denoise/resolve/main/denoise_mel_band_roformer_aufr33_sdr_27.9959.ckpt",
     },
     {
@@ -78,7 +78,7 @@ denoise_models = [
         "model": os.path.join(now_dir, "models", "mel-denoise-aggr", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "mel-denoise-aggr", "config.yaml"),
         "type": "mel_band_roformer",
-        "config_url": "https://huggingface.co/jarredou/aufr33_MelBand_Denoise/resolve/main/model_mel_band_roformer_denoise.yaml",
+        "config_url": "https://huggingface.co/shiromiya/audio-separation-models/resolve/main/mel-denoise/model_mel_band_roformer_denoise.yaml",
         "model_url": "https://huggingface.co/jarredou/aufr33_MelBand_Denoise/resolve/main/denoise_mel_band_roformer_aufr33_aggr_sdr_27.9768.ckpt",
     },
     {
