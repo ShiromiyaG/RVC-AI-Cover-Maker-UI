@@ -132,7 +132,6 @@ def get_number_of_gpus():
     else:
         return "-"
 
-
 def max_vram_gpu(gpu):
     if torch.cuda.is_available():
         gpu_properties = torch.cuda.get_device_properties(gpu)
@@ -563,11 +562,10 @@ def full_inference_tab():
                     label=i18n("Device"),
                     info=i18n(
                         "Select the device to use for the conversion. 0 to ∞ separated by - and for CPU leave only an -"
-                    ),
-                    value=get_number_of_gpus(),
-                    interactive=True,
-                )
-
+                ),
+                 value=get_number_of_gpus,
+                 interactive=True,
+            )
     with gr.Row():
         convert_button = gr.Button(i18n("Convert"))
 
