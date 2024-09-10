@@ -9,6 +9,8 @@ from pydub import AudioSegment
 from audio_separator.separator import Separator
 import logging
 import torch.nn as nn
+import yaml
+
 now_dir = os.getcwd()
 sys.path.append(now_dir)
 from programs.applio_code.rvc.infer.infer import VoiceConverter
@@ -69,7 +71,7 @@ denoise_models = [
         "model": os.path.join(now_dir, "models", "mel-denoise", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "mel-denoise", "config.yaml"),
         "type": "mel_band_roformer",
-        "config_url": "https://huggingface.co/jarredou/aufr33_MelBand_Denoise/resolve/main/model_mel_band_roformer_denoise.yaml",
+        "config_url": "https://huggingface.co/shiromiya/audio-separation-models/resolve/main/mel-denoise/model_mel_band_roformer_denoise.yaml",
         "model_url": "https://huggingface.co/jarredou/aufr33_MelBand_Denoise/resolve/main/denoise_mel_band_roformer_aufr33_sdr_27.9959.ckpt",
     },
     {
@@ -78,7 +80,7 @@ denoise_models = [
         "model": os.path.join(now_dir, "models", "mel-denoise-aggr", "model.ckpt"),
         "config": os.path.join(now_dir, "models", "mel-denoise-aggr", "config.yaml"),
         "type": "mel_band_roformer",
-        "config_url": "https://huggingface.co/jarredou/aufr33_MelBand_Denoise/resolve/main/model_mel_band_roformer_denoise.yaml",
+        "config_url": "https://huggingface.co/shiromiya/audio-separation-models/resolve/main/mel-denoise/model_mel_band_roformer_denoise.yaml",
         "model_url": "https://huggingface.co/jarredou/aufr33_MelBand_Denoise/resolve/main/denoise_mel_band_roformer_aufr33_aggr_sdr_27.9768.ckpt",
     },
     {
@@ -273,6 +275,16 @@ def merge_audios(
     return output_path
 
 
+def check_fp16_support(device):
+    i_device = int(device.split(":")[-1])
+    gpu_name = torch.cuda.get_device_name(i_device)
+    low_end_gpus = ["16", "P40", "P10", "1060", "1070", "1080"]
+    if any(gpu in gpu_name for gpu in low_end_gpus) and "V100" not in gpu_name.upper():
+        print(f"Your GPU {gpu_name} not support FP16 inference. Using FP32 instead.")
+        return False
+    return True
+
+
 def full_inference_program(
     model_path,
     index_path,
@@ -312,16 +324,20 @@ def full_inference_program(
     batch_size,
     infer_backing_vocals,
 ):
-    # Configuração de devices
     if torch.cuda.is_available():
-        device = "cuda"
-        print("Using GPU:", device)
-        # Get the number of available Cuda GPUs
+        devices = devices.split("-")
+        if type(devices) == list:
+            device = f"cuda:{devices[0]}"
+        else:
+            device = f"cuda:{devices}"
         n_gpu = torch.cuda.device_count()
         print("Number of GPUs available:{n_gpu}")
+        fp16 = check_fp16_support(device)
     else:
         device = "cpu"
-        print("Using CPU:", device)
+        print("Using CPU")
+        fp16 = False
+
     # Vocals Separation
     model_info = get_model_info_by_name(vocal_model)
     model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
@@ -338,6 +354,14 @@ def full_inference_program(
             model_info["path"],
             "config.yaml",
         )
+    if not fp16:
+        with open(model_info["config"], "r") as file:
+            config = yaml.safe_load(file)
+
+        config["training"]["use_amp"] = False
+
+        with open(model_info["config"], "w") as file:
+            yaml.safe_dump(config, file)
     store_dir = os.path.join(now_dir, "audio_files", "vocals")
     inst_dir = os.path.join(now_dir, "audio_files", "instrumentals")
     os.makedirs(store_dir, exist_ok=True)
@@ -415,6 +439,14 @@ def full_inference_program(
                     model_info["path"],
                     "config.yaml",
                 )
+            if not fp16:
+                with open(model_info["config"], "r") as file:
+                    config = yaml.safe_load(file)
+
+                config["training"]["use_amp"] = False
+
+                with open(model_info["config"], "w") as file:
+                    yaml.safe_dump(config, file)
             proc_file(
                 model_type=model_info["type"],
                 config_path=model_info["config"],
@@ -505,6 +537,14 @@ def full_inference_program(
                     model_info["path"],
                     "config.yaml",
                 )
+            if not fp16:
+                with open(model_info["config"], "r") as file:
+                    config = yaml.safe_load(file)
+
+                config["training"]["use_amp"] = False
+
+                with open(model_info["config"], "w") as file:
+                    yaml.safe_dump(config, file)
             proc_file(
                 model_type=model_info["type"],
                 config_path=model_info["config"],
@@ -660,6 +700,14 @@ def full_inference_program(
                     download_file(
                         model_info["config_url"], model_info["path"], "config.yaml"
                     )
+                if not fp16:
+                    with open(model_info["config"], "r") as file:
+                        config = yaml.safe_load(file)
+
+                    config["training"]["use_amp"] = False
+
+                    with open(model_info["config"], "w") as file:
+                        yaml.safe_dump(config, file)
                 proc_file(
                     model_type=model_info["type"],
                     config_path=model_info["config"],
