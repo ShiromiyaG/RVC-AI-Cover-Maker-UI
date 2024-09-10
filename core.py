@@ -8,7 +8,7 @@ from pedalboard.io import AudioFile
 from pydub import AudioSegment
 from audio_separator.separator import Separator
 import logging
-
+import torch.nn as nn
 now_dir = os.getcwd()
 sys.path.append(now_dir)
 from programs.applio_code.rvc.infer.infer import VoiceConverter
@@ -313,14 +313,15 @@ def full_inference_program(
     infer_backing_vocals,
 ):
     # Configuração de devices
-    if devices == "-":
+    if torch.cuda.is_available():
+        device = "cuda"
+        print("Using GPU:", device)
+        # Get the number of available Cuda GPUs
+        n_gpu = torch.cuda.device_count()
+        print("Number of GPUs available: {n_gpu}")
+    else:
         device = "cpu"
-    else:
-        devices = devices.split("-")
-    if len(devices) == 1:
-        device = f"cuda:{devices[0]}"
-    else:
-        device = f"cuda:{devices[0]}"
+        print("Using CPU:", device)
     # Vocals Separation
     model_info = get_model_info_by_name(vocal_model)
     model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")

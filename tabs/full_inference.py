@@ -6,7 +6,6 @@ from assets.i18n.i18n import I18nAuto
 import torch
 import shutil
 import unicodedata
-import torch.nn as nn
 
 i18n = I18nAuto()
 
@@ -128,9 +127,10 @@ def output_path_fn(input_audio_path):
 def get_number_of_gpus():
     if torch.cuda.is_available():
         num_gpus = torch.cuda.device_count()
-        return [f"cuda:{i}" for i in range(num_gpus)]
+        return "-".join(map(str, range(num_gpus)))
     else:
-        return ["cpu"]
+        return "-"
+
 
 def max_vram_gpu(gpu):
     if torch.cuda.is_available():
@@ -562,10 +562,11 @@ def full_inference_tab():
                     label=i18n("Device"),
                     info=i18n(
                         "Select the device to use for the conversion. 0 to ∞ separated by - and for CPU leave only an -"
-                ),
-                 value=get_number_of_gpus,
-                 interactive=True,
-            )
+                    ),
+                    value=get_number_of_gpus(),
+                    interactive=True,
+                )
+
     with gr.Row():
         convert_button = gr.Button(i18n("Convert"))
 
