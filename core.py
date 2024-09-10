@@ -318,7 +318,7 @@ def full_inference_program(
         print("Using GPU:", device)
         # Get the number of available Cuda GPUs
         n_gpu = torch.cuda.device_count()
-        print("Number of GPUs available: {n_gpu}")
+        print("Number of GPUs available:{n_gpu}")
     else:
         device = "cpu"
         print("Using CPU:", device)
