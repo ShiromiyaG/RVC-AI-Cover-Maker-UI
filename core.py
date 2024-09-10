@@ -326,15 +326,16 @@ def full_inference_program(
     batch_size,
     infer_backing_vocals,
 ):
-    if devices == "-":
-        device = "cpu"
-    else:
+    if torch.cuda.is_available():
         devices = devices.split("-")
         fp16 = check_fp16_support(device)
         if type(devices) == list:
             device = f"cuda:{devices[0]}"
         else:
             device = f"cuda:{devices}"
+    else:
+        device = "cpu"
+        fp16 = False
     # Vocals Separation
     model_info = get_model_info_by_name(vocal_model)
     model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
