@@ -6,6 +6,7 @@ from assets.i18n.i18n import I18nAuto
 import torch
 import shutil
 import unicodedata
+import torch.nn as nn
 
 i18n = I18nAuto()
 
@@ -124,12 +125,14 @@ def output_path_fn(input_audio_path):
     return output_path
 
 
-def get_number_of_gpus():
+def get_number_of_gpus(devices):
     if torch.cuda.is_available():
         num_gpus = torch.cuda.device_count()
         return "-".join(map(str, range(num_gpus)))
     else:
         return "-"
+    device_ids = [int(x) for x in devices.split('-') if x]
+    model = nn.DataParallel(model, device_ids=device_ids)
 
 
 def max_vram_gpu(gpu):
