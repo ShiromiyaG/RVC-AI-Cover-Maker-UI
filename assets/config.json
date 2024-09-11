@@ -1,9 +1,9 @@
 {
-    "theme": {
+  "theme": {
     "file": null,
-    "class": "ParityError/Interstellar"
+    "class": "nuttea/Softblue"
   },
-    "lang": {
+  "lang": {
     "override": false,
     "selected_lang": "en_US"
   }
