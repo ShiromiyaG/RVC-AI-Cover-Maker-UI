@@ -338,6 +338,8 @@ def full_inference_program(
         print("Using CPU")
         fp16 = False
 
+    music_folder = os.path.splitext(os.path.basename(input_audio_path))[0]
+
     # Vocals Separation
     model_info = get_model_info_by_name(vocal_model)
     model_ckpt_path = os.path.join(model_info["path"], "model.ckpt")
@@ -362,8 +364,8 @@ def full_inference_program(
 
         with open(model_info["config"], "w") as file:
             yaml.safe_dump(config, file)
-    store_dir = os.path.join(now_dir, "audio_files", "vocals")
-    inst_dir = os.path.join(now_dir, "audio_files", "instrumentals")
+    store_dir = os.path.join(now_dir, music_folder, "audio_files", "vocals")
+    inst_dir = os.path.join(now_dir, music_folder, "audio_files", "instrumentals")
     os.makedirs(store_dir, exist_ok=True)
     os.makedirs(inst_dir, exist_ok=True)
     input_audio_basename = os.path.splitext(os.path.basename(input_audio_path))[0]
@@ -409,11 +411,10 @@ def full_inference_program(
 
     # karaoke separation
     model_info = get_model_info_by_name(karaoke_model)
-    store_dir = os.path.join(now_dir, "audio_files", "karaoke")
+    store_dir = os.path.join(now_dir, music_folder, "audio_files", "karaoke")
     os.makedirs(store_dir, exist_ok=True)
-    vocals_path = os.path.join(now_dir, "audio_files", "vocals")
+    vocals_path = os.path.join(now_dir, music_folder, "audio_files", "vocals")
     input_file = search_with_word(vocals_path, "vocals")
-    input_audio_basename = os.path.basename(input_audio_path).split(".")[0]
     karaoke_exists = (
         search_with_two_words(store_dir, input_audio_basename, "karaoke") is not None
     )
@@ -475,7 +476,7 @@ def full_inference_program(
             )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
-            karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
+            karaoke_path = os.path.join(now_dir, music_folder, "audio_files", "karaoke")
             vocals_result = search_with_two_words(
                 karaoke_path,
                 os.path.basename(input_audio_path).split(".")[0],
@@ -505,11 +506,10 @@ def full_inference_program(
 
     # dereverb
     model_info = get_model_info_by_name(dereverb_model)
-    store_dir = os.path.join(now_dir, "audio_files", "dereverb")
+    store_dir = os.path.join(now_dir, music_folder, "audio_files", "dereverb")
     os.makedirs(store_dir, exist_ok=True)
-    karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
+    karaoke_path = os.path.join(now_dir, music_folder, "audio_files", "karaoke")
     input_file = search_with_word(karaoke_path, "karaoke")
-    input_audio_basename = os.path.basename(input_audio_path).split(".")[0]
     noreverb_exists = (
         search_with_two_words(store_dir, input_audio_basename, "noreverb") is not None
     )
@@ -584,7 +584,9 @@ def full_inference_program(
                 )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
-            dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
+            dereverb_path = os.path.join(
+                now_dir, music_folder, "audio_files", "dereverb"
+            )
             search_result = search_with_two_words(
                 dereverb_path,
                 os.path.basename(input_audio_path).split(".")[0],
@@ -602,10 +604,9 @@ def full_inference_program(
                 )
 
     # deecho
-    store_dir = os.path.join(now_dir, "audio_files", "deecho")
+    store_dir = os.path.join(now_dir, music_folder, "audio_files", "deecho")
     os.makedirs(store_dir, exist_ok=True)
     if deecho:
-        input_audio_basename = os.path.basename(input_audio_path).split(".")[0]
         no_echo_exists = (
             search_with_two_words(store_dir, input_audio_basename, "noecho") is not None
         )
@@ -615,7 +616,9 @@ def full_inference_program(
             print("Removing echo")
             model_info = get_model_info_by_name(deecho_model)
 
-            dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
+            dereverb_path = os.path.join(
+                now_dir, music_folder, "audio_files", "dereverb"
+            )
             noreverb_file = search_with_word(dereverb_path, "noreverb")
 
             input_file = os.path.join(dereverb_path, noreverb_file)
@@ -634,7 +637,7 @@ def full_inference_program(
             )
             separator.load_model(model_filename=model_info["full_name"])
             separator.separate(input_file)
-            deecho_path = os.path.join(now_dir, "audio_files", "deecho")
+            deecho_path = os.path.join(now_dir, music_folder, "audio_files", "deecho")
             search_result = search_with_two_words(
                 deecho_path,
                 os.path.basename(input_audio_path).split(".")[0],
@@ -652,10 +655,9 @@ def full_inference_program(
                 )
 
     # denoise
-    store_dir = os.path.join(now_dir, "audio_files", "denoise")
+    store_dir = os.path.join(now_dir, music_folder, "audio_files", "denoise")
     os.makedirs(store_dir, exist_ok=True)
     if denoise:
-        input_audio_basename = os.path.basename(input_audio_path).split(".")[0]
         no_noise_exists = (
             search_with_two_words(store_dir, input_audio_basename, "dry") is not None
         )
@@ -667,19 +669,23 @@ def full_inference_program(
             input_file = (
                 os.path.join(
                     now_dir,
+                    music_folder,
                     "audio_files",
                     "deecho",
                     search_with_word(
-                        os.path.join(now_dir, "audio_files", "deecho"), "noecho"
+                        os.path.join(now_dir, music_folder, "audio_files", "deecho"),
+                        "noecho",
                     ),
                 )
                 if deecho
                 else os.path.join(
                     now_dir,
+                    music_folder,
                     "audio_files",
                     "dereverb",
                     search_with_word(
-                        os.path.join(now_dir, "audio_files", "dereverb"), "noreverb"
+                        os.path.join(now_dir, music_folder, "audio_files", "dereverb"),
+                        "noreverb",
                     ),
                 )
             )
@@ -724,7 +730,9 @@ def full_inference_program(
                 )
             else:
                 separator = Separator(
-                    model_file_dir=os.path.join(now_dir, "models", "denoise"),
+                    model_file_dir=os.path.join(
+                        now_dir, music_folder, "models", "denoise"
+                    ),
                     log_level=logging.WARNING,
                     normalization_threshold=1.0,
                     output_format="flac",
@@ -752,9 +760,9 @@ def full_inference_program(
                     )
 
     # RVC
-    denoise_path = os.path.join(now_dir, "audio_files", "denoise")
-    deecho_path = os.path.join(now_dir, "audio_files", "deecho")
-    dereverb_path = os.path.join(now_dir, "audio_files", "dereverb")
+    denoise_path = os.path.join(now_dir, music_folder, "audio_files", "denoise")
+    deecho_path = os.path.join(now_dir, music_folder, "audio_files", "deecho")
+    dereverb_path = os.path.join(now_dir, music_folder, "audio_files", "dereverb")
 
     denoise_audio = search_with_two_words(
         denoise_path, os.path.basename(input_audio_path).split(".")[0], "dry"
@@ -767,19 +775,26 @@ def full_inference_program(
     )
 
     if denoise_audio:
-        final_path = os.path.join(now_dir, "audio_files", "denoise", denoise_audio)
+        final_path = os.path.join(
+            now_dir, music_folder, "audio_files", "denoise", denoise_audio
+        )
     elif deecho_audio:
-        final_path = os.path.join(now_dir, "audio_files", "deecho", deecho_audio)
+        final_path = os.path.join(
+            now_dir, music_folder, "audio_files", "deecho", deecho_audio
+        )
     elif dereverb:
-        final_path = os.path.join(now_dir, "audio_files", "dereverb", dereverb)
+        final_path = os.path.join(
+            now_dir, music_folder, "audio_files", "dereverb", dereverb
+        )
     else:
         final_path = None
 
-    store_dir = os.path.join(now_dir, "audio_files", "rvc")
+    store_dir = os.path.join(now_dir, music_folder, "audio_files", "rvc")
     os.makedirs(store_dir, exist_ok=True)
     print("Making RVC inference")
     output_rvc = os.path.join(
         now_dir,
+        music_folder,
         "audio_files",
         "rvc",
         f"{os.path.basename(input_audio_path).split('.')[0]}_rvc.wav",
@@ -806,10 +821,9 @@ def full_inference_program(
     )
     if infer_backing_vocals:
         print("Infering backing vocals")
-        karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
+        karaoke_path = os.path.join(now_dir, music_folder, "audio_files", "karaoke")
         instrumental_file = search_with_word(karaoke_path, "instrumental")
         backing_vocals = os.path.join(karaoke_path, instrumental_file)
-        input_audio_basename = os.path.splitext(os.path.basename(input_audio_path))[0]
         output_backing_vocals = os.path.join(
             karaoke_path, f"{input_audio_basename}_instrumental.wav"
         )
@@ -837,9 +851,12 @@ def full_inference_program(
         add_audio_effects(
             os.path.join(
                 now_dir,
+                music_folder,
                 "audio_files",
                 "rvc",
-                get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc")),
+                get_last_modified_file(
+                    os.path.join(now_dir, music_folder, "audio_files", "rvc")
+                ),
             ),
             reverb_room_size,
             reverb_wet_gain,
@@ -848,6 +865,7 @@ def full_inference_program(
             reverb_width,
             os.path.join(
                 now_dir,
+                music_folder,
                 "audio_files",
                 "rvc",
                 os.path.basename(input_audio_path),
@@ -855,20 +873,23 @@ def full_inference_program(
         )
 
     # merge audios
-    store_dir = os.path.join(now_dir, "audio_files", "final")
+    store_dir = os.path.join(now_dir, music_folder, "audio_files", "final")
     os.makedirs(store_dir, exist_ok=True)
 
-    vocals_path = os.path.join(now_dir, "audio_files", "rvc")
-    vocals_file = get_last_modified_file(os.path.join(now_dir, "audio_files", "rvc"))
+    vocals_path = os.path.join(now_dir, music_folder, "audio_files", "rvc")
+    vocals_file = get_last_modified_file(
+        os.path.join(now_dir, music_folder, "audio_files", "rvc")
+    )
     vocals_file = os.path.join(vocals_path, vocals_file)
 
-    karaoke_path = os.path.join(now_dir, "audio_files", "karaoke")
+    karaoke_path = os.path.join(now_dir, music_folder, "audio_files", "karaoke")
     karaoke_file = search_with_word(karaoke_path, "Instrumental") or search_with_word(
         karaoke_path, "instrumental"
     )
     karaoke_file = os.path.join(karaoke_path, karaoke_file)
     final_output_path = os.path.join(
         now_dir,
+        music_folder,
         "audio_files",
         "final",
         f"{os.path.basename(input_audio_path).split('.')[0]}_final.{export_format_final.lower()}",
@@ -886,7 +907,7 @@ def full_inference_program(
     )
     print("Audios merged!")
     if delete_audios:
-        main_directory = os.path.join(now_dir, "audio_files")
+        main_directory = os.path.join(now_dir, music_folder, "audio_files")
         folder_to_keep = "final"
         for folder_name in os.listdir(main_directory):
             folder_path = os.path.join(main_directory, folder_name)
