@@ -669,8 +669,8 @@ def full_inference_program(
             input_file = (
                 os.path.join(
                     now_dir,
-                    music_folder,
                     "audio_files",
+                    music_folder,
                     "deecho",
                     search_with_word(
                         os.path.join(now_dir, "audio_files", music_folder, "deecho"),
@@ -680,8 +680,8 @@ def full_inference_program(
                 if deecho
                 else os.path.join(
                     now_dir,
-                    music_folder,
                     "audio_files",
+                    music_folder,
                     "dereverb",
                     search_with_word(
                         os.path.join(now_dir, "audio_files", music_folder, "dereverb"),
@@ -730,9 +730,7 @@ def full_inference_program(
                 )
             else:
                 separator = Separator(
-                    model_file_dir=os.path.join(
-                        now_dir, music_folder, "models", "denoise"
-                    ),
+                    model_file_dir=os.path.join(now_dir, "models", "denoise"),
                     log_level=logging.WARNING,
                     normalization_threshold=1.0,
                     output_format="flac",
@@ -794,8 +792,8 @@ def full_inference_program(
     print("Making RVC inference")
     output_rvc = os.path.join(
         now_dir,
-        music_folder,
         "audio_files",
+        music_folder,
         "rvc",
         f"{os.path.basename(input_audio_path).split('.')[0]}_rvc.wav",
     )
@@ -851,8 +849,8 @@ def full_inference_program(
         add_audio_effects(
             os.path.join(
                 now_dir,
-                music_folder,
                 "audio_files",
+                music_folder,
                 "rvc",
                 get_last_modified_file(
                     os.path.join(now_dir, "audio_files", music_folder, "rvc")
@@ -865,8 +863,8 @@ def full_inference_program(
             reverb_width,
             os.path.join(
                 now_dir,
-                music_folder,
                 "audio_files",
+                music_folder,
                 "rvc",
                 os.path.basename(input_audio_path),
             ),
@@ -889,8 +887,8 @@ def full_inference_program(
     karaoke_file = os.path.join(karaoke_path, karaoke_file)
     final_output_path = os.path.join(
         now_dir,
-        music_folder,
         "audio_files",
+        music_folder,
         "final",
         f"{os.path.basename(input_audio_path).split('.')[0]}_final.{export_format_final.lower()}",
     )
