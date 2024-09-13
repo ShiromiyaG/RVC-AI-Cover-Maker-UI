@@ -339,11 +339,10 @@ def full_inference_program(
 ):
     if torch.cuda.is_available():
         n_gpu = torch.cuda.device_count()
-        devices = list(map(int, devices.split("-")))
-        devices_str = " ".join(map(str, devices))
+        devices = devices.replace("-", " ")
         print(f"Number of GPUs available: {n_gpu}")
-        print(f"Devices: {devices_str}")
-        first_device = devices[0]
+        print(f"Devices: {devices}")
+        first_device = devices.split()[0]
         fp16 = check_fp16_support(first_device)
     else:
         devices = "cpu"
@@ -386,27 +385,31 @@ def full_inference_program(
         print("Vocals already separated"),
     else:
         print("Separating vocals")
-        args = [
+        command = [
+            "python",
+            os.path.join(now_dir, "programs", "music_separation_code", "inference.py"),
             "--model_type",
             model_info["type"],
             "--config_path",
             model_info["config"],
             "--start_check_point",
-            model_info["model"],
+            model_info["path"],
             "--input_file",
             input_audio_path,
             "--store_dir",
             store_dir,
-            "--device_ids",
-            devices_str,
-            "--extract_instrumental",
-            "--force_cpu" if devices == "cpu" else "",
             "--flac_file",
             "--pcm_type",
             "PCM_16",
-            "--use_tta" if use_tta else "",
+            "--extract_instrumental",
         ]
-        proc_file(args)
+
+        if devices == "cpu":
+            command.append("--force_cpu")
+        else:
+            command.extend(["--device_ids", devices])
+
+        subprocess.run(command)
         os.rename(
             os.path.join(
                 store_dir,
@@ -465,26 +468,34 @@ def full_inference_program(
 
                 with open(model_info["config"], "w") as file:
                     yaml.safe_dump(config, file)
-            args = [
+
+            command = [
+                "python",
+                os.path.join(
+                    now_dir, "programs", "music_separation_code", "inference.py"
+                ),
                 "--model_type",
                 model_info["type"],
                 "--config_path",
                 model_info["config"],
                 "--start_check_point",
-                model_info["model"],
+                model_info["path"],
                 "--input_file",
                 input_file,
                 "--store_dir",
                 store_dir,
-                "--device_ids",
-                devices_str,
-                "--extract_instrumental",
                 "--flac_file",
                 "--pcm_type",
                 "PCM_16",
-                "--use_tta" if use_tta else "",
+                "--extract_instrumental",
             ]
-            proc_file(args)
+
+            if devices == "cpu":
+                command.append("--force_cpu")
+            else:
+                command.extend(["--device_ids", devices])
+
+            subprocess.run(command)
         else:
             separator = Separator(
                 model_file_dir=os.path.join(now_dir, "models", "karaoke"),
@@ -566,25 +577,32 @@ def full_inference_program(
 
                 with open(model_info["config"], "w") as file:
                     yaml.safe_dump(config, file)
-            args = [
+            command = [
+                "python",
+                os.path.join(
+                    now_dir, "programs", "music_separation_code", "inference.py"
+                ),
                 "--model_type",
                 model_info["type"],
                 "--config_path",
                 model_info["config"],
                 "--start_check_point",
-                model_info["model"],
+                model_info["path"],
                 "--input_file",
                 input_file,
                 "--store_dir",
                 store_dir,
-                "--device_ids",
-                devices_str,
                 "--flac_file",
                 "--pcm_type",
                 "PCM_16",
-                "--use_tta" if use_tta else "",
             ]
-            proc_file(args)
+
+            if devices == "cpu":
+                command.append("--force_cpu")
+            else:
+                command.extend(["--device_ids", devices])
+
+            subprocess.run(command)
         else:
             if model_info["arch"] == "vr":
                 separator = Separator(
@@ -736,25 +754,32 @@ def full_inference_program(
 
                     with open(model_info["config"], "w") as file:
                         yaml.safe_dump(config, file)
-                args = [
+                command = [
+                    "python",
+                    os.path.join(
+                        now_dir, "programs", "music_separation_code", "inference.py"
+                    ),
                     "--model_type",
                     model_info["type"],
                     "--config_path",
                     model_info["config"],
                     "--start_check_point",
-                    model_info["model"],
+                    model_info["path"],
                     "--input_file",
                     input_file,
                     "--store_dir",
                     store_dir,
-                    "--device_ids",
-                    devices_str,
                     "--flac_file",
                     "--pcm_type",
                     "PCM_16",
-                    "--use_tta" if use_tta else "",
                 ]
-                proc_file(args)
+
+                if devices == "cpu":
+                    command.append("--force_cpu")
+                else:
+                    command.extend(["--device_ids", devices])
+
+                subprocess.run(command)
             else:
                 separator = Separator(
                     model_file_dir=os.path.join(now_dir, "models", "denoise"),
