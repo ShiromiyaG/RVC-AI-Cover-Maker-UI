@@ -329,7 +329,113 @@ def full_inference_tab():
                             inputs=[infer_backing_vocals_model],
                             outputs=[infer_backing_vocals_index],
                         )
-
+                with gr.Accordion(
+                    i18n("RVC Settings for Backing vocals"), open=False, visible=False
+                ) as back_rvc_settings:
+                    export_format_rvc_back = gr.Radio(
+                        label=i18n("Export Format"),
+                        info=i18n("Select the format to export the audio."),
+                        choices=["WAV", "MP3", "FLAC", "OGG", "M4A"],
+                        value="FLAC",
+                        interactive=True,
+                        visible=False,
+                    )
+                    split_audio_back = gr.Checkbox(
+                        label=i18n("Split Audio"),
+                        info=i18n(
+                            "Split the audio into chunks for inference to obtain better results in some cases."
+                        ),
+                        visible=True,
+                        value=False,
+                        interactive=True,
+                    )
+                    pitch_extract_back = gr.Radio(
+                        label=i18n("Pitch Extractor"),
+                        info=i18n("Pitch extract Algorith."),
+                        choices=["rmvpe", "crepe", "crepe-tiny"],
+                        value="rmvpe",
+                        interactive=True,
+                    )
+                    hop_length_back = gr.Slider(
+                        label=i18n("Hop Length"),
+                        info=i18n("Hop length for pitch extraction."),
+                        minimum=1,
+                        maximum=512,
+                        step=1,
+                        value=64,
+                        visible=False,
+                    )
+                    embedder_model_back = gr.Radio(
+                        label=i18n("Embedder Model"),
+                        info=i18n("Model used for learning speaker embedding."),
+                        choices=[
+                            "contentvec",
+                            "chinese-hubert-base",
+                            "japanese-hubert-base",
+                            "korean-hubert-base",
+                        ],
+                        value="contentvec",
+                        interactive=True,
+                    )
+                    autotune_back = gr.Checkbox(
+                        label=i18n("Autotune"),
+                        info=i18n(
+                            "Apply a soft autotune to your inferences, recommended for singing conversions."
+                        ),
+                        visible=True,
+                        value=False,
+                        interactive=True,
+                    )
+                    pitch_back = gr.Slider(
+                        label=i18n("Pitch"),
+                        info=i18n("Adjust the pitch of the audio."),
+                        minimum=-12,
+                        maximum=12,
+                        step=1,
+                        value=0,
+                        interactive=True,
+                    )
+                    filter_radius_back = gr.Slider(
+                        minimum=0,
+                        maximum=7,
+                        label=i18n("Filter Radius"),
+                        info=i18n(
+                            "If the number is greater than or equal to three, employing median filtering on the collected tone results has the potential to decrease respiration."
+                        ),
+                        value=3,
+                        step=1,
+                        interactive=True,
+                    )
+                    index_rate_back = gr.Slider(
+                        minimum=0,
+                        maximum=1,
+                        label=i18n("Search Feature Ratio"),
+                        info=i18n(
+                            "Influence exerted by the index file; a higher value corresponds to greater influence. However, opting for lower values can help mitigate artifacts present in the audio."
+                        ),
+                        value=0.75,
+                        interactive=True,
+                    )
+                    rms_mix_rate_back = gr.Slider(
+                        minimum=0,
+                        maximum=1,
+                        label=i18n("Volume Envelope"),
+                        info=i18n(
+                            "Substitute or blend with the volume envelope of the output. The closer the ratio is to 1, the more the output envelope is employed."
+                        ),
+                        value=0.25,
+                        interactive=True,
+                    )
+                    protect_back = gr.Slider(
+                        minimum=0,
+                        maximum=0.5,
+                        label=i18n("Protect Voiceless Consonants"),
+                        info=i18n(
+                            "Safeguard distinct consonants and breathing sounds to prevent electro-acoustic tearing and other artifacts. Pulling the parameter to its maximum value of 0.5 offers comprehensive protection. However, reducing this value might decrease the extent of protection while potentially mitigating the indexing effect."
+                        ),
+                        value=0.33,
+                        interactive=True,
+                    )
                 clear_outputs_infer = gr.Button(
                     i18n("Clear Outputs (Deletes all audios in assets/audios)")
                 )
@@ -655,6 +761,7 @@ def full_inference_tab():
             {"visible": visible, "__type__": "update"},
             {"visible": visible, "__type__": "update"},
             {"visible": visible, "__type__": "update"},
+            {"visible": visible, "__type__": "update"},
         )
 
     def update_hop_length_visibility(pitch_extract_value):
@@ -723,6 +830,17 @@ def full_inference_tab():
             infer_backing_vocals_model,
             infer_backing_vocals_index,
             change_inst_pitch,
+            pitch_back,
+            filter_radius_back,
+            index_rate_back,
+            rms_mix_rate_back,
+            protect_back,
+            pitch_extract_back,
+            hop_length_back,
+            export_format_rvc_back,
+            split_audio_back,
+            autotune_back,
+            embedder_model_back,
         ],
         outputs=[vc_output1, vc_output2],
     )
@@ -764,5 +882,6 @@ def full_inference_tab():
             infer_backing_vocals_index,
             refresh_button_infer_backing_vocals,
             unload_button_infer_backing_vocals,
+            back_rvc_settings,
         ],
     )
