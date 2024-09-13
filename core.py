@@ -275,7 +275,7 @@ def merge_audios(
 
 
 def check_fp16_support(device):
-    i_device = int(device.split(":")[-1])
+    i_device = int(str(device).split(":")[-1])
     gpu_name = torch.cuda.get_device_name(i_device)
     low_end_gpus = ["16", "P40", "P10", "1060", "1070", "1080"]
     if any(gpu in gpu_name for gpu in low_end_gpus) and "V100" not in gpu_name.upper():
@@ -340,8 +340,11 @@ def full_inference_program(
     if torch.cuda.is_available():
         n_gpu = torch.cuda.device_count()
         devices = list(map(int, devices.split("-")))
+        devices_str = " ".join(map(str, devices))
         print(f"Number of GPUs available: {n_gpu}")
-        fp16 = check_fp16_support(devices)
+        print(f"Devices: {devices_str}")
+        first_device = devices[0]
+        fp16 = check_fp16_support(first_device)
     else:
         devices = "cpu"
         print("Using CPU")
@@ -383,19 +386,27 @@ def full_inference_program(
         print("Vocals already separated"),
     else:
         print("Separating vocals")
-        proc_file(
-            model_type=model_info["type"],
-            config_path=model_info["config"],
-            start_check_point=model_info["model"],
-            input_file=input_audio_path,
-            store_dir=store_dir,
-            device_ids=devices,
-            extract_instrumental=True,
-            disable_detailed_pbar=False,
-            flac_file=True,
-            pcm_type="PCM_16",
-            use_tta=use_tta,
-        )
+        args = [
+            "--model_type",
+            model_info["type"],
+            "--config_path",
+            model_info["config"],
+            "--start_check_point",
+            model_info["model"],
+            "--input_file",
+            input_audio_path,
+            "--store_dir",
+            store_dir,
+            "--device_ids",
+            devices_str,
+            "--extract_instrumental",
+            "--force_cpu" if devices == "cpu" else "",
+            "--flac_file",
+            "--pcm_type",
+            "PCM_16",
+            "--use_tta" if use_tta else "",
+        ]
+        proc_file(args)
         os.rename(
             os.path.join(
                 store_dir,
@@ -454,19 +465,26 @@ def full_inference_program(
 
                 with open(model_info["config"], "w") as file:
                     yaml.safe_dump(config, file)
-            proc_file(
-                model_type=model_info["type"],
-                config_path=model_info["config"],
-                start_check_point=model_info["model"],
-                input_file=input_file,
-                store_dir=store_dir,
-                device_ids=devices,
-                extract_instrumental=True,
-                disable_detailed_pbar=False,
-                flac_file=True,
-                pcm_type="PCM_16",
-                use_tta=use_tta,
-            )
+            args = [
+                "--model_type",
+                model_info["type"],
+                "--config_path",
+                model_info["config"],
+                "--start_check_point",
+                model_info["model"],
+                "--input_file",
+                input_file,
+                "--store_dir",
+                store_dir,
+                "--device_ids",
+                devices_str,
+                "--extract_instrumental",
+                "--flac_file",
+                "--pcm_type",
+                "PCM_16",
+                "--use_tta" if use_tta else "",
+            ]
+            proc_file(args)
         else:
             separator = Separator(
                 model_file_dir=os.path.join(now_dir, "models", "karaoke"),
@@ -548,19 +566,25 @@ def full_inference_program(
 
                 with open(model_info["config"], "w") as file:
                     yaml.safe_dump(config, file)
-            proc_file(
-                model_type=model_info["type"],
-                config_path=model_info["config"],
-                start_check_point=model_info["model"],
-                input_file=input_file,
-                store_dir=store_dir,
-                device_ids=devices,
-                extract_instrumental=False,
-                disable_detailed_pbar=False,
-                flac_file=True,
-                pcm_type="PCM_16",
-                use_tta=use_tta,
-            )
+            args = [
+                "--model_type",
+                model_info["type"],
+                "--config_path",
+                model_info["config"],
+                "--start_check_point",
+                model_info["model"],
+                "--input_file",
+                input_file,
+                "--store_dir",
+                store_dir,
+                "--device_ids",
+                devices_str,
+                "--flac_file",
+                "--pcm_type",
+                "PCM_16",
+                "--use_tta" if use_tta else "",
+            ]
+            proc_file(args)
         else:
             if model_info["arch"] == "vr":
                 separator = Separator(
@@ -712,19 +736,25 @@ def full_inference_program(
 
                     with open(model_info["config"], "w") as file:
                         yaml.safe_dump(config, file)
-                proc_file(
-                    model_type=model_info["type"],
-                    config_path=model_info["config"],
-                    start_check_point=model_info["model"],
-                    input_file=input_file,
-                    store_dir=store_dir,
-                    device_ids=devices,
-                    extract_instrumental=False,
-                    disable_detailed_pbar=False,
-                    flac_file=True,
-                    pcm_type="PCM_16",
-                    use_tta=use_tta,
-                )
+                args = [
+                    "--model_type",
+                    model_info["type"],
+                    "--config_path",
+                    model_info["config"],
+                    "--start_check_point",
+                    model_info["model"],
+                    "--input_file",
+                    input_file,
+                    "--store_dir",
+                    store_dir,
+                    "--device_ids",
+                    devices_str,
+                    "--flac_file",
+                    "--pcm_type",
+                    "PCM_16",
+                    "--use_tta" if use_tta else "",
+                ]
+                proc_file(args)
             else:
                 separator = Separator(
                     model_file_dir=os.path.join(now_dir, "models", "denoise"),
