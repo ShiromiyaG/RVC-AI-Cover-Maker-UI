@@ -510,6 +510,15 @@ def full_inference_tab():
                     visible=False,
                 )
             with gr.Accordion(i18n("Audio post-process Settings"), open=False):
+                change_inst_pitch = gr.Slider(
+                    label=i18n("Change Instrumental Pitch"),
+                    info=i18n("Change the pitch of the instrumental."),
+                    minimum=-12,
+                    maximum=12,
+                    step=1,
+                    value=0,
+                    interactive=True,
+                )
                 delete_audios = gr.Checkbox(
                     label=i18n("Delete Audios"),
                     info=i18n("Delete the audios after the conversion."),
@@ -713,6 +722,7 @@ def full_inference_tab():
             infer_backing_vocals,
             infer_backing_vocals_model,
             infer_backing_vocals_index,
+            change_inst_pitch,
         ],
         outputs=[vc_output1, vc_output2],
     )

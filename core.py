@@ -10,6 +10,8 @@ from audio_separator.separator import Separator
 import logging
 import torch.nn as nn
 import yaml
+import librosa
+import soundfile as sf
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -325,6 +327,7 @@ def full_inference_program(
     infer_backing_vocals,
     infer_backing_vocals_model,
     infer_backing_vocals_index,
+    change_inst_pitch,
 ):
     if torch.cuda.is_available():
         devices = devices.split("-")
@@ -871,6 +874,28 @@ def full_inference_program(
                 os.path.basename(input_audio_path),
             ),
         )
+    if change_inst_pitch != 0:
+        print("Changing instrumental pitch")
+        inst_path = os.path.join(
+            now_dir,
+            "audio_files",
+            music_folder,
+            "instrumenals",
+            search_with_word(
+                os.path.join(now_dir, "audio_files", music_folder, "instrumentals"),
+                "instrumentals",
+            ),
+        )
+        y, sr = librosa.load(inst_path)
+
+        y_shifted = librosa.effects.pitch_shift(y, sr, n_steps=change_inst_pitch)
+        output_dir_pitch = os.path.join(
+            now_dir, "audio_files", music_folder, "instrumentals"
+        )
+        output_path_pitch = os.path.join(
+            output_dir_pitch, "inst_with_changed_pitch.wav"
+        )
+        sf.write(output_path_pitch, y_shifted, sr)
 
     # merge audios
     store_dir = os.path.join(now_dir, "audio_files", music_folder, "final")
