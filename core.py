@@ -401,6 +401,12 @@ def full_inference_program(
             pcm_type="PCM_16",
             use_tta=use_tta,
         )
+        target_file = os.path.join(
+            inst_dir,
+            f"{os.path.basename(input_audio_path).split('.')[0]}_instrumentals.flac",
+        )
+        if os.path.exists(target_file):
+            os.remove(target_file)
         os.rename(
             os.path.join(
                 store_dir,
@@ -410,10 +416,7 @@ def full_inference_program(
                     "instrumental",
                 ),
             ),
-            os.path.join(
-                inst_dir,
-                f"{os.path.basename(input_audio_path).split('.')[0]}_instrumentals.flac",
-            ),
+            target_file,
         )
     inst_file = os.path.join(
         inst_dir,
@@ -501,20 +504,26 @@ def full_inference_program(
                 "Instrumental",
             )
             if "UVR-BVE-4B_SN-44100-1" in os.path.basename(vocals_result):
+                target_file = os.path.join(
+                    karaoke_path,
+                    f"{os.path.basename(input_audio_path).split('.')[0]}_karaoke.flac",
+                )
+                if os.path.exists(target_file):
+                    os.remove(target_file)
                 os.rename(
                     os.path.join(karaoke_path, vocals_result),
-                    os.path.join(
-                        karaoke_path,
-                        f"{os.path.basename(input_audio_path).split('.')[0]}_karaoke.flac",
-                    ),
+                    target_file,
                 )
             if "UVR-BVE-4B_SN-44100-1" in os.path.basename(instrumental_result):
+                target_file = os.path.join(
+                    karaoke_path,
+                    f"{os.path.basename(input_audio_path).split('.')[0]}_instrumental.flac",
+                )
+                if os.path.exists(target_file):
+                    os.remove(target_file)
                 os.rename(
                     os.path.join(karaoke_path, instrumental_result),
-                    os.path.join(
-                        karaoke_path,
-                        f"{os.path.basename(input_audio_path).split('.')[0]}_instrumental.flac",
-                    ),
+                    target_file,
                 )
 
     # dereverb
@@ -608,12 +617,15 @@ def full_inference_program(
             if "UVR-DeEcho-DeReverb" in os.path.basename(
                 search_result
             ) or "MDX Reverb HQ by FoxJoy" in os.path.basename(search_result):
+                target_file = os.path.join(
+                    dereverb_path,
+                    f"{os.path.basename(input_audio_path).split('.')[0]}_noreverb.flac",
+                )
+                if os.path.exists(target_file):
+                    os.remove(target_file)
                 os.rename(
                     os.path.join(dereverb_path, search_result),
-                    os.path.join(
-                        dereverb_path,
-                        f"{os.path.basename(input_audio_path).split('.')[0]}_noreverb.flac",
-                    ),
+                    target_file,
                 )
 
     # deecho
@@ -659,16 +671,16 @@ def full_inference_program(
             if "UVR-De-Echo-Normal" in os.path.basename(
                 search_result
             ) or "UVR-Deecho-Agggressive" in os.path.basename(search_result):
-                try:
-                    os.rename(
-                        os.path.join(deecho_path, search_result),
-                        os.path.join(
-                            deecho_path,
-                            f"{os.path.basename(input_audio_path).split('.')[0]}_noecho.flac",
-                        ),
-                    )
-                except Exception as e:
-                    print(f"Error renaming file: {e}")
+                target_file = os.path.join(
+                    deecho_path,
+                    f"{os.path.basename(input_audio_path).split('.')[0]}_noecho.flac",
+                )
+                if os.path.exists(target_file):
+                    os.remove(target_file)
+                os.rename(
+                    os.path.join(deecho_path, search_result),
+                    target_file,
+                )
 
     # denoise
     store_dir = os.path.join(now_dir, "audio_files", music_folder, "denoise")
@@ -765,12 +777,15 @@ def full_inference_program(
                     "No Noise",
                 )
                 if "UVR Denoise" in os.path.basename(search_result):
+                    target_file = os.path.join(
+                        deecho_path,
+                        f"{os.path.basename(input_audio_path).split('.')[0]}_dry.flac",
+                    )
+                    if os.path.exists(target_file):
+                        os.remove(target_file)
                     os.rename(
                         os.path.join(deecho_path, search_result),
-                        os.path.join(
-                            deecho_path,
-                            f"{os.path.basename(input_audio_path).split('.')[0]}_dry.flac",
-                        ),
+                        target_file,
                     )
 
     # RVC
