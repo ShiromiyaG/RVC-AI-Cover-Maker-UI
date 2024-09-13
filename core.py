@@ -8,10 +8,7 @@ from pedalboard.io import AudioFile
 from pydub import AudioSegment
 from audio_separator.separator import Separator
 import logging
-import torch.nn as nn
 import yaml
-import librosa
-import soundfile as sf
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -897,16 +894,22 @@ def full_inference_program(
                 "instrumentals",
             ),
         )
-        y, sr = librosa.load(inst_path)
+        audio = AudioSegment.from_file(inst_path)
 
-        y_shifted = librosa.effects.pitch_shift(y=y, sr=sr, n_steps=change_inst_pitch)
+        semitones = 2
+        factor = 2 ** (semitones / 12)
+
+        new_frame_rate = int(audio.frame_rate * factor)
+        audio = audio._spawn(audio.raw_data, overrides={"frame_rate": new_frame_rate})
+
+        audio = audio.set_frame_rate(audio.frame_rate)
         output_dir_pitch = os.path.join(
             now_dir, "audio_files", music_folder, "instrumentals"
         )
         output_path_pitch = os.path.join(
             output_dir_pitch, "inst_with_changed_pitch.flac"
         )
-        sf.write(output_path_pitch, y_shifted, sr, format="FLAC")
+        audio.export(output_path_pitch, format="flac")
 
     # merge audios
     store_dir = os.path.join(now_dir, "audio_files", music_folder, "final")
