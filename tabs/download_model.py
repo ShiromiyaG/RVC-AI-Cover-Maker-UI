@@ -23,24 +23,31 @@ def save_drop_model(dropbox):
         if ".pth" in dropbox:
             model_name = format_title(file_name.split(".pth")[0])
         else:
-            if "v2" not in dropbox:
-                if "_nprobe_1_" in file_name and "_v1" in file_name:
-                    model_name = format_title(
-                        file_name.split("_nprobe_1_")[1].split("_v1")[0]
-                    )
-                elif "added_" in file_name and "_v1" in file_name:
-                    model_name = format_title(
-                        file_name.split("added_")[1].split("_v1")[0]
-                    )
+            if (
+                "v2" not in dropbox
+                and "added_" not in dropbox
+                and "_nprobe_1_" not in dropbox
+            ):
+                model_name = format_title(file_name.split(".index")[0])
             else:
-                if "_nprobe_1_" in file_name and "_v2" in file_name:
-                    model_name = format_title(
-                        file_name.split("_nprobe_1_")[1].split("_v2")[0]
-                    )
-                elif "added_" in file_name and "_v2" in file_name:
-                    model_name = format_title(
-                        file_name.split("added_")[1].split("_v2")[0]
-                    )
+                if "v2" not in dropbox:
+                    if "_nprobe_1_" in file_name and "_v1" in file_name:
+                        model_name = format_title(
+                            file_name.split("_nprobe_1_")[1].split("_v1")[0]
+                        )
+                    elif "added_" in file_name and "_v1" in file_name:
+                        model_name = format_title(
+                            file_name.split("added_")[1].split("_v1")[0]
+                        )
+                else:
+                    if "_nprobe_1_" in file_name and "_v2" in file_name:
+                        model_name = format_title(
+                            file_name.split("_nprobe_1_")[1].split("_v2")[0]
+                        )
+                    elif "added_" in file_name and "_v2" in file_name:
+                        model_name = format_title(
+                            file_name.split("added_")[1].split("_v2")[0]
+                        )
 
         model_name = re.sub(r"\d+[se]", "", model_name)
         if "__" in model_name:
