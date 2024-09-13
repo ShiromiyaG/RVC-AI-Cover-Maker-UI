@@ -659,13 +659,16 @@ def full_inference_program(
             if "UVR-De-Echo-Normal" in os.path.basename(
                 search_result
             ) or "UVR-Deecho-Agggressive" in os.path.basename(search_result):
-                os.rename(
-                    os.path.join(deecho_path, search_result),
-                    os.path.join(
-                        deecho_path,
-                        f"{os.path.basename(input_audio_path).split('.')[0]}_noecho.flac",
-                    ),
-                )
+                try:
+                    os.rename(
+                        os.path.join(deecho_path, search_result),
+                        os.path.join(
+                            deecho_path,
+                            f"{os.path.basename(input_audio_path).split('.')[0]}_noecho.flac",
+                        ),
+                    )
+                except Exception as e:
+                    print(f"Error renaming file: {e}")
 
     # denoise
     store_dir = os.path.join(now_dir, "audio_files", music_folder, "denoise")
