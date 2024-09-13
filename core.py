@@ -609,8 +609,6 @@ def full_inference_program(
                     dereverb_path,
                     f"{os.path.basename(input_audio_path).split('.')[0]}_noreverb.flac",
                 )
-                if os.path.exists(destination_path):
-                    os.remove(destination_path)
                 os.rename(source_path, destination_path)
 
     # deecho
