@@ -341,7 +341,6 @@ def full_inference_program(
         n_gpu = torch.cuda.device_count()
         devices = devices.replace("-", " ")
         print(f"Number of GPUs available: {n_gpu}")
-        print(f"Devices: {devices}")
         first_device = devices.split()[0]
         fp16 = check_fp16_support(first_device)
     else:
