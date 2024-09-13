@@ -896,8 +896,7 @@ def full_inference_program(
         )
         audio = AudioSegment.from_file(inst_path)
 
-        semitones = 2
-        factor = 2 ** (semitones / 12)
+        factor = 2 ** (change_inst_pitch / 12)
 
         new_frame_rate = int(audio.frame_rate * factor)
         audio = audio._spawn(audio.raw_data, overrides={"frame_rate": new_frame_rate})
