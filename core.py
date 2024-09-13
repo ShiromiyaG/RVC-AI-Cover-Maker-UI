@@ -338,16 +338,12 @@ def full_inference_program(
     embedder_model_back,
 ):
     if torch.cuda.is_available():
-        devices = devices.split("-")
-        if type(devices) == list:
-            device = f"cuda:{devices[0]}"
-        else:
-            device = f"cuda:{devices}"
         n_gpu = torch.cuda.device_count()
+        devices = " ".join(str(i) for i in range(n_gpu))
         print(f"Number of GPUs available: {n_gpu}")
-        fp16 = check_fp16_support(device)
+        fp16 = check_fp16_support(devices)
     else:
-        device = "cpu"
+        devices = "cpu"
         print("Using CPU")
         fp16 = False
 
@@ -394,7 +390,7 @@ def full_inference_program(
             input_file=input_audio_path,
             store_dir=store_dir,
             device_ids=devices,
-            device=device,
+            device=devices,
             extract_instrumental=True,
             disable_detailed_pbar=False,
             flac_file=True,
@@ -466,7 +462,7 @@ def full_inference_program(
                 input_file=input_file,
                 store_dir=store_dir,
                 device_ids=devices,
-                device=device,
+                device=devices,
                 extract_instrumental=True,
                 disable_detailed_pbar=False,
                 flac_file=True,
@@ -561,7 +557,7 @@ def full_inference_program(
                 input_file=input_file,
                 store_dir=store_dir,
                 device_ids=devices,
-                device=device,
+                device=devices,
                 extract_instrumental=False,
                 disable_detailed_pbar=False,
                 flac_file=True,
@@ -726,7 +722,7 @@ def full_inference_program(
                     input_file=input_file,
                     store_dir=store_dir,
                     device_ids=devices,
-                    device=device,
+                    device=devices,
                     extract_instrumental=False,
                     disable_detailed_pbar=False,
                     flac_file=True,
