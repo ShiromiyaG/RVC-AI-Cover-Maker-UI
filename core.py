@@ -393,7 +393,7 @@ def full_inference_program(
             "--config_path",
             model_info["config"],
             "--start_check_point",
-            model_info["path"],
+            model_info["model"],
             "--input_file",
             input_audio_path,
             "--store_dir",
@@ -407,7 +407,8 @@ def full_inference_program(
         if devices == "cpu":
             command.append("--force_cpu")
         else:
-            command.extend(["--device_ids", devices])
+            device_ids = [str(int(device)) for device in devices.split()]
+            command.extend(["--device_ids"] + device_ids)
 
         subprocess.run(command)
         os.rename(
@@ -479,7 +480,7 @@ def full_inference_program(
                 "--config_path",
                 model_info["config"],
                 "--start_check_point",
-                model_info["path"],
+                model_info["model"],
                 "--input_file",
                 input_file,
                 "--store_dir",
@@ -493,7 +494,8 @@ def full_inference_program(
             if devices == "cpu":
                 command.append("--force_cpu")
             else:
-                command.extend(["--device_ids", devices])
+                device_ids = [str(int(device)) for device in devices.split()]
+                command.extend(["--device_ids"] + device_ids)
 
             subprocess.run(command)
         else:
@@ -587,7 +589,7 @@ def full_inference_program(
                 "--config_path",
                 model_info["config"],
                 "--start_check_point",
-                model_info["path"],
+                model_info["model"],
                 "--input_file",
                 input_file,
                 "--store_dir",
@@ -600,7 +602,8 @@ def full_inference_program(
             if devices == "cpu":
                 command.append("--force_cpu")
             else:
-                command.extend(["--device_ids", devices])
+                device_ids = [str(int(device)) for device in devices.split()]
+                command.extend(["--device_ids"] + device_ids)
 
             subprocess.run(command)
         else:
@@ -764,7 +767,7 @@ def full_inference_program(
                     "--config_path",
                     model_info["config"],
                     "--start_check_point",
-                    model_info["path"],
+                    model_info["model"],
                     "--input_file",
                     input_file,
                     "--store_dir",
@@ -777,7 +780,8 @@ def full_inference_program(
                 if devices == "cpu":
                     command.append("--force_cpu")
                 else:
-                    command.extend(["--device_ids", devices])
+                    device_ids = [str(int(device)) for device in devices.split()]
+                    command.extend(["--device_ids"] + device_ids)
 
                 subprocess.run(command)
             else:

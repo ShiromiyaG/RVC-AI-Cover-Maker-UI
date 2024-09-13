@@ -148,7 +148,7 @@ def proc_file(args):
         help="Initial checkpoint to valid weights",
     )
     parser.add_argument(
-        "--input_folder", type=str, help="folder with mixtures to process"
+        "--input_file", type=str, help="folder with mixtures to process"
     )
     parser.add_argument(
         "--store_dir", default="", type=str, help="path to store results as wav file"
@@ -240,3 +240,7 @@ def proc_file(args):
     print("Model load time: {:.2f} sec".format(time.time() - model_load_start_time))
 
     run_file(model, args, config, device, verbose=True)
+
+
+if __name__ == "__main__":
+    proc_file(None)
