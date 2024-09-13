@@ -323,6 +323,8 @@ def full_inference_program(
     use_tta,
     batch_size,
     infer_backing_vocals,
+    infer_backing_vocals_model,
+    infer_backing_vocals_index,
 ):
     if torch.cuda.is_available():
         devices = devices.split("-")
@@ -828,8 +830,8 @@ def full_inference_program(
         inference_vc.convert_audio(
             audio_input_path=backing_vocals,
             audio_output_path=output_backing_vocals,
-            model_path=model_path,
-            index_path=index_path,
+            model_path=infer_backing_vocals_model,
+            index_path=infer_backing_vocals_index,
             embedder_model=embedder_model,
             pitch=pitch,
             f0_file=None,

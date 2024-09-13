@@ -280,6 +280,56 @@ def full_inference_tab():
                     value=False,
                     interactive=True,
                 )
+                with gr.Row():
+                    infer_backing_vocals_model = gr.Dropdown(
+                        label=i18n("Backing Vocals Model"),
+                        info=i18n(
+                            "Select the backing vocals model to use for the conversion."
+                        ),
+                        choices=sorted(names, key=lambda path: os.path.getsize(path)),
+                        interactive=True,
+                        value=default_weight,
+                        visible=False,
+                        allow_custom_value=False,
+                    )
+                    infer_backing_vocals_index = gr.Dropdown(
+                        label=i18n("Backing Vocals Index File"),
+                        info=i18n(
+                            "Select the backing vocals index file to use for the conversion."
+                        ),
+                        choices=get_indexes(),
+                        value=match_index(default_weight) if default_weight else "",
+                        interactive=True,
+                        visible=False,
+                        allow_custom_value=True,
+                    )
+                    with gr.Column():
+                        refresh_button_infer_backing_vocals = gr.Button(
+                            i18n("Refresh"),
+                            visible=False,
+                        )
+                        unload_button_infer_backing_vocals = gr.Button(
+                            i18n("Unload Voice"),
+                            visible=False,
+                        )
+
+                        unload_button_infer_backing_vocals.click(
+                            fn=lambda: (
+                                {"value": "", "__type__": "update"},
+                                {"value": "", "__type__": "update"},
+                            ),
+                            inputs=[],
+                            outputs=[
+                                infer_backing_vocals_model,
+                                infer_backing_vocals_index,
+                            ],
+                        )
+                        infer_backing_vocals_model.select(
+                            fn=lambda model_file_value: match_index(model_file_value),
+                            inputs=[infer_backing_vocals_model],
+                            outputs=[infer_backing_vocals_index],
+                        )
+
                 clear_outputs_infer = gr.Button(
                     i18n("Clear Outputs (Deletes all audios in assets/audios)")
                 )
@@ -589,6 +639,15 @@ def full_inference_tab():
             reverb_width: gr.update(visible=reverb_checked),
         }
 
+    def update_visibility_infer_backing(infer_backing_vocals):
+        visible = infer_backing_vocals
+        return (
+            {"visible": visible, "__type__": "update"},
+            {"visible": visible, "__type__": "update"},
+            {"visible": visible, "__type__": "update"},
+            {"visible": visible, "__type__": "update"},
+        )
+
     def update_hop_length_visibility(pitch_extract_value):
         return gr.update(visible=pitch_extract_value in ["crepe", "crepe-tiny"])
 
@@ -596,6 +655,11 @@ def full_inference_tab():
         fn=change_choices,
         inputs=[],
         outputs=[model_file, index_file, audio],
+    )
+    refresh_button_infer_backing_vocals.click(
+        fn=change_choices,
+        inputs=[],
+        outputs=[infer_backing_vocals_model, infer_backing_vocals_index],
     )
     upload_audio.upload(
         fn=save_to_wav,
@@ -647,6 +711,8 @@ def full_inference_tab():
             use_tta,
             batch_size,
             infer_backing_vocals,
+            infer_backing_vocals_model,
+            infer_backing_vocals_index,
         ],
         outputs=[vc_output1, vc_output2],
     )
@@ -678,4 +744,15 @@ def full_inference_tab():
         fn=update_hop_length_visibility,
         inputs=pitch_extract,
         outputs=hop_length,
+    )
+
+    infer_backing_vocals.change(
+        fn=update_visibility_infer_backing,
+        inputs=[infer_backing_vocals],
+        outputs=[
+            infer_backing_vocals_model,
+            infer_backing_vocals_index,
+            refresh_button_infer_backing_vocals,
+            unload_button_infer_backing_vocals,
+        ],
     )
