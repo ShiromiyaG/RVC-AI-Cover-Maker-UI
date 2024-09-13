@@ -893,9 +893,9 @@ def full_inference_program(
             now_dir, "audio_files", music_folder, "instrumentals"
         )
         output_path_pitch = os.path.join(
-            output_dir_pitch, "inst_with_changed_pitch.wav"
+            output_dir_pitch, "inst_with_changed_pitch.flac"
         )
-        sf.write(output_path_pitch, y_shifted, sr)
+        sf.write(output_path_pitch, y_shifted, sr, format="FLAC")
 
     # merge audios
     store_dir = os.path.join(now_dir, "audio_files", music_folder, "final")
