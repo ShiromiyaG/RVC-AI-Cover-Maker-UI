@@ -899,7 +899,7 @@ def full_inference_program(
         )
         y, sr = librosa.load(inst_path)
 
-        y_shifted = librosa.effects.pitch_shift(y, sr, n_steps=change_inst_pitch)
+        y_shifted = librosa.effects.pitch_shift(y=y, sr=sr, n_steps=change_inst_pitch)
         output_dir_pitch = os.path.join(
             now_dir, "audio_files", music_folder, "instrumentals"
         )
