@@ -138,7 +138,6 @@ def proc_file(
     start_check_point,
     input_file,
     store_dir,
-    device,
     device_ids,
     extract_instrumental,
     disable_detailed_pbar,

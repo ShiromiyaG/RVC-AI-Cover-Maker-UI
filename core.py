@@ -339,7 +339,7 @@ def full_inference_program(
 ):
     if torch.cuda.is_available():
         n_gpu = torch.cuda.device_count()
-        devices = " ".join(str(i) for i in range(n_gpu))
+        devices = list(map(int, devices.split("-")))
         print(f"Number of GPUs available: {n_gpu}")
         fp16 = check_fp16_support(devices)
     else:
@@ -390,7 +390,6 @@ def full_inference_program(
             input_file=input_audio_path,
             store_dir=store_dir,
             device_ids=devices,
-            device=devices,
             extract_instrumental=True,
             disable_detailed_pbar=False,
             flac_file=True,
@@ -462,7 +461,6 @@ def full_inference_program(
                 input_file=input_file,
                 store_dir=store_dir,
                 device_ids=devices,
-                device=devices,
                 extract_instrumental=True,
                 disable_detailed_pbar=False,
                 flac_file=True,
@@ -557,7 +555,6 @@ def full_inference_program(
                 input_file=input_file,
                 store_dir=store_dir,
                 device_ids=devices,
-                device=devices,
                 extract_instrumental=False,
                 disable_detailed_pbar=False,
                 flac_file=True,
@@ -722,7 +719,6 @@ def full_inference_program(
                     input_file=input_file,
                     store_dir=store_dir,
                     device_ids=devices,
-                    device=devices,
                     extract_instrumental=False,
                     disable_detailed_pbar=False,
                     flac_file=True,
