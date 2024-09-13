@@ -604,12 +604,13 @@ def full_inference_program(
             if "UVR-DeEcho-DeReverb" in os.path.basename(
                 search_result
             ) or "MDX Reverb HQ by FoxJoy" in os.path.basename(search_result):
-                source_path = os.path.join(dereverb_path, search_result)
-                destination_path = os.path.join(
-                    dereverb_path,
-                    f"{os.path.basename(input_audio_path).split('.')[0]}_noreverb.flac",
+                os.rename(
+                    os.path.join(dereverb_path, search_result),
+                    os.path.join(
+                        dereverb_path,
+                        f"{os.path.basename(input_audio_path).split('.')[0]}_noreverb.flac",
+                    ),
                 )
-                os.rename(source_path, destination_path)
 
     # deecho
     store_dir = os.path.join(now_dir, "audio_files", music_folder, "deecho")
