@@ -382,7 +382,7 @@ def full_inference_program(
     os.makedirs(store_dir, exist_ok=True)
     os.makedirs(inst_dir, exist_ok=True)
     input_audio_basename = os.path.splitext(os.path.basename(input_audio_path))[0]
-    search_result = search_with_two_words(store_dir, input_audio_basename, "vocals")
+    search_result = search_with_word(store_dir, "vocals")
     if search_result:
         print("Vocals already separated"),
     else:
@@ -428,9 +428,7 @@ def full_inference_program(
     os.makedirs(store_dir, exist_ok=True)
     vocals_path = os.path.join(now_dir, "audio_files", music_folder, "vocals")
     input_file = search_with_word(vocals_path, "vocals")
-    karaoke_exists = (
-        search_with_two_words(store_dir, input_audio_basename, "karaoke") is not None
-    )
+    karaoke_exists = search_with_word(store_dir, "karaoke") is not None
 
     if karaoke_exists:
         print("Backing vocals already separated")
@@ -523,9 +521,7 @@ def full_inference_program(
     os.makedirs(store_dir, exist_ok=True)
     karaoke_path = os.path.join(now_dir, "audio_files", music_folder, "karaoke")
     input_file = search_with_word(karaoke_path, "karaoke")
-    noreverb_exists = (
-        search_with_two_words(store_dir, input_audio_basename, "noreverb") is not None
-    )
+    noreverb_exists = search_with_word(store_dir, "noreverb") is not None
     if noreverb_exists:
         print("Reverb already removed")
     else:
@@ -621,9 +617,7 @@ def full_inference_program(
     store_dir = os.path.join(now_dir, "audio_files", music_folder, "deecho")
     os.makedirs(store_dir, exist_ok=True)
     if deecho:
-        no_echo_exists = (
-            search_with_two_words(store_dir, input_audio_basename, "noecho") is not None
-        )
+        no_echo_exists = search_with_word(store_dir, "noecho") is not None
         if no_echo_exists:
             print("Echo already removed")
         else:
@@ -672,9 +666,7 @@ def full_inference_program(
     store_dir = os.path.join(now_dir, "audio_files", music_folder, "denoise")
     os.makedirs(store_dir, exist_ok=True)
     if denoise:
-        no_noise_exists = (
-            search_with_two_words(store_dir, input_audio_basename, "dry") is not None
-        )
+        no_noise_exists = search_with_word(store_dir, "dry") is not None
         if no_noise_exists:
             print("Noise already removed")
         else:
