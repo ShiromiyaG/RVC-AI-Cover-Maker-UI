@@ -880,7 +880,7 @@ def full_inference_program(
             now_dir,
             "audio_files",
             music_folder,
-            "instrumenals",
+            "instrumentals",
             search_with_word(
                 os.path.join(now_dir, "audio_files", music_folder, "instrumentals"),
                 "instrumentals",
