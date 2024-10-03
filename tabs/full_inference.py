@@ -352,7 +352,7 @@ def full_inference_tab():
                     pitch_extract_back = gr.Radio(
                         label=i18n("Pitch Extractor"),
                         info=i18n("Pitch extract Algorith."),
-                        choices=["rmvpe", "crepe", "crepe-tiny"],
+                        choices=["rmvpe", "crepe", "crepe-tiny", "fcpe"],
                         value="rmvpe",
                         interactive=True,
                     )
@@ -459,7 +459,7 @@ def full_inference_tab():
                 pitch_extract = gr.Radio(
                     label=i18n("Pitch Extractor"),
                     info=i18n("Pitch extract Algorith."),
-                    choices=["rmvpe", "crepe", "crepe-tiny"],
+                    choices=["rmvpe", "crepe", "crepe-tiny", "fcpe"],
                     value="rmvpe",
                     interactive=True,
                 )
