@@ -872,13 +872,17 @@ def full_inference_program(
         export_format=export_format_rvc,
         embedder_model_custom=None,
     )
+    backing_vocals = os.path.join(
+        karaoke_path, search_with_word(karaoke_path, "instrumental")
+    )
+
     if infer_backing_vocals:
         print("Infering backing vocals")
         karaoke_path = os.path.join(now_dir, "audio_files", music_folder, "karaoke")
         instrumental_file = search_with_word(karaoke_path, "instrumental")
         backing_vocals = os.path.join(karaoke_path, instrumental_file)
         output_backing_vocals = os.path.join(
-            karaoke_path, f"{input_audio_basename}_instrumental.wav"
+            karaoke_path, f"{input_audio_basename}_instrumental_output.wav"
         )
         inference_vc.convert_audio(
             audio_input_path=backing_vocals,
@@ -899,6 +903,8 @@ def full_inference_program(
             export_format=export_format_rvc_back,
             embedder_model_custom=None,
         )
+        backing_vocals = output_backing_vocals
+
     # post process
     if reverb:
         add_audio_effects(
@@ -978,7 +984,7 @@ def full_inference_program(
     result = merge_audios(
         vocals_file,
         inst_file,
-        karaoke_file,
+        backing_vocals,
         final_output_path,
         vocals_volume,
         instrumentals_volume,
